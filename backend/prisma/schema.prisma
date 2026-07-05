@@ -1,0 +1,114 @@
+// Schema Prisma – CivicAlert
+// Esegui: npx prisma migrate dev --name init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Utenti ────────────────────────────────────────────────────────────────────
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  passwordHash    String    @map("password_hash")
+  nome            String
+  cognome         String
+  telefono        String?
+  role            Role      @default(CITIZEN)
+  isVerified      Boolean   @default(false) @map("is_verified")
+  isBanned        Boolean   @default(false) @map("is_banned")
+  verifyToken     String?   @map("verify_token")
+  resetToken      String?   @map("reset_token")
+  resetTokenExp   DateTime? @map("reset_token_exp")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  lastLogin       DateTime? @map("last_login")
+
+  reports         Report[]
+
+  @@map("users")
+}
+
+enum Role {
+  CITIZEN
+  OPERATOR
+  ADMIN
+}
+
+// ── Comuni ────────────────────────────────────────────────────────────────────
+model Municipality {
+  id              String    @id @default(uuid())
+  name            String
+  province        String
+  region          String
+  istatCode       String    @unique @map("istat_code")
+  pecAddress      String?   @map("pec_address")
+  whatsappNumber  String?   @map("whatsapp_number")
+  notifyPec       Boolean   @default(true)  @map("notify_pec")
+  notifyWhatsapp  Boolean   @default(false) @map("notify_whatsapp")
+  isActive        Boolean   @default(true)  @map("is_active")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt      @map("updated_at")
+
+  reports         Report[]
+
+  @@map("municipalities")
+}
+
+// ── Categorie ─────────────────────────────────────────────────────────────────
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  icon        String
+  isPredefined Boolean @default(false) @map("is_predefined")
+  isActive    Boolean  @default(true)  @map("is_active")
+  sortOrder   Int      @default(0)     @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  reports     Report[]
+
+  @@map("categories")
+}
+
+// ── Segnalazioni ──────────────────────────────────────────────────────────────
+model Report {
+  id               String         @id @default(uuid())
+  userId           String         @map("user_id")
+  user             User           @relation(fields: [userId], references: [id])
+  categoryId       String         @map("category_id")
+  category         Category       @relation(fields: [categoryId], references: [id])
+  description      String?
+  mediaUrl         String?        @map("media_url")
+  mediaType        MediaType?     @map("media_type")
+  latitude         Float
+  longitude        Float
+  addressResolved  String?        @map("address_resolved")
+  municipalityId   String?        @map("municipality_id")
+  municipality     Municipality?  @relation(fields: [municipalityId], references: [id])
+  status           ReportStatus   @default(PENDING)
+  pecSent          Boolean        @default(false) @map("pec_sent")
+  pecMessageId     String?        @map("pec_message_id")
+  pecSentAt        DateTime?      @map("pec_sent_at")
+  whatsappSent     Boolean        @default(false) @map("whatsapp_sent")
+  whatsappMsgId    String?        @map("whatsapp_msg_id")
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt      @map("updated_at")
+
+  @@map("reports")
+}
+
+enum MediaType {
+  PHOTO
+  VIDEO
+}
+
+enum ReportStatus {
+  PENDING       // in attesa
+  SENT          // inviata al comune
+  ACKNOWLEDGED  // presa in carico
+  RESOLVED      // risolta
+  REJECTED      // respinta
+}
