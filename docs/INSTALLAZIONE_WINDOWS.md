@@ -218,7 +218,7 @@ docker compose cp backup\<data>\uploads\. app:/data/uploads
 
 | Problema | Soluzione |
 |---|---|
-| `docker compose up` dice "port is already allocated" su 80 o 443 | Un altro programma usa la porta (IIS, Skype, un altro server web). Trova quale con `netstat -ano \| findstr ":80 :443"` e fermalo |
+| `docker compose ps` non mostra `caddy`, oppure "port is already allocated" su 80 o 443 | Un altro programma usa la porta. Controlla con `netstat -ano \| findstr LISTENING \| findstr ":80 :443"`: se il PID è **4**, quasi sempre è IIS (in `http://localhost` compare una pagina di IIS o un errore 404). Se non ti serve, in PowerShell come amministratore: `Stop-Service W3SVC, WAS -Force; Set-Service W3SVC -StartupType Disabled; Set-Service WAS -StartupType Disabled`, poi `docker compose up -d` |
 | Dal telefono la pagina non si apre | Telefono sulla stessa rete? Rete Windows impostata su "Privata"? Regola firewall creata (passo 5)? |
 | Avviso "connessione non privata" sul telefono | Certificato non installato o (iPhone) non attivato in "Impostazioni certificati attendibili" |
 | "Il GPS funziona solo con connessione sicura" | Stai usando `http://`: apri `https://IP-DEL-SERVER` |
