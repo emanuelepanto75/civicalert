@@ -1,0 +1,14 @@
+# Fine riga Unix per i file usati nei container, anche se il repo è clonato su Windows
+* text=auto
+*.sh text eol=lf
+Caddyfile text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.json text eol=lf
+*.prisma text eol=lf
+*.sql text eol=lf
+*.csv text eol=lf
+Dockerfile text eol=lf
+*.ps1 text eol=crlf
+*.png binary
+*.jpg binary

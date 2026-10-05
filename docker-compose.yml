@@ -1,0 +1,83 @@
+# CivicAlert – installazione locale (rete di casa/ufficio + VPN)
+# Avvio:   docker compose up -d --build
+# Log:     docker compose logs -f app
+# Stop:    docker compose down
+
+name: civicalert
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: civicalert
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Imposta DB_PASSWORD nel file .env}
+      POSTGRES_DB: civicalert
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U civicalert"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build: ./app
+    restart: unless-stopped
+    init: true
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://civicalert:${DB_PASSWORD}@db:5432/civicalert
+      COOKIE_SECURE: "true"
+      REQUIRE_EMAIL_VERIFICATION: ${REQUIRE_EMAIL_VERIFICATION:-true}
+      MAX_REPORTS_PER_DAY: ${MAX_REPORTS_PER_DAY:-5}
+      DUPLICATE_RADIUS_M: ${DUPLICATE_RADIUS_M:-50}
+      MAX_GPS_ACCURACY_M: ${MAX_GPS_ACCURACY_M:-200}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-50}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      # Posta: di default tutto finisce in Mailpit, nessuna email esce dal server
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      MAIL_FROM: ${MAIL_FROM:-CivicAlert <segnalazioni@civicalert.local>}
+      PEC_OVERRIDE_TO: ${PEC_OVERRIDE_TO:-}
+      NOMINATIM_EMAIL: ${NOMINATIM_EMAIL:-}
+    volumes:
+      - app_data:/data # foto/video caricati + chiave delle sessioni
+
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    environment:
+      MP_WEBROOT: mailpit
+      MP_DATABASE: /data/mailpit.db
+      MP_MAX_MESSAGES: 5000
+      MP_UI_AUTH: admin:${MAILPIT_PASSWORD:?Imposta MAILPIT_PASSWORD nel file .env}
+    volumes:
+      - mailpit_data:/data
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      SERVER_IP: ${SERVER_IP:?Imposta SERVER_IP nel file .env}
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  db_data:
+  app_data:
+  mailpit_data:
+  caddy_data:
+  caddy_config:
