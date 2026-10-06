@@ -1,7 +1,7 @@
 // Dati dimostrativi per presentare il cruscotto dell'ufficio.
 //   npm run db:demo            crea operatore e segnalazioni di prova
-//   npm run db:demo -- --remove  cancella tutto ciò che è stato creato
-// In Docker: docker compose exec app npm run db:demo
+//   node prisma/demo.mjs --remove  cancella tutto ciò che è stato creato
+// In Docker: docker compose exec app node prisma/demo.mjs [--remove]
 //
 // Nessuna PEC viene inviata. Tutti i dati appartengono agli utenti
 // @demo.civicalert.local e si eliminano con --remove.
@@ -82,7 +82,7 @@ async function remove() {
 
 async function create() {
   if (await prisma.user.findUnique({ where: { email: CITIZEN_EMAIL } })) {
-    console.log('[demo] I dati dimostrativi esistono già. Per ricrearli: npm run db:demo -- --remove, poi di nuovo npm run db:demo');
+    console.log('[demo] I dati dimostrativi esistono già. Per ricrearli: node prisma/demo.mjs --remove, poi di nuovo node prisma/demo.mjs');
     return;
   }
   const municipality = await prisma.municipality.findUnique({ where: { istatCode: ISTAT } });

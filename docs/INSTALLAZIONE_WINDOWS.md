@@ -198,8 +198,8 @@ risoluzione / respingimento con email automatica al cittadino, note interne e st
 
 **Dati dimostrativi (per presentazioni)**
 ```powershell
-docker compose exec app npm run db:demo             # crea ~26 segnalazioni finte a Messina
-docker compose exec app npm run db:demo -- --remove # le cancella tutte
+docker compose exec app node prisma/demo.mjs            # crea ~26 segnalazioni finte a Messina
+docker compose exec app node prisma/demo.mjs --remove   # le cancella tutte
 ```
 Accesso demo: `operatore@demo.civicalert.local` / `demo-civicalert`. Le foto sono riquadri con la scritta
 "FOTO DIMOSTRATIVA" e nessuna PEC viene inviata. Ricordati di rimuoverli prima dell'uso reale.
