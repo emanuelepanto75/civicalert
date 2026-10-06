@@ -182,6 +182,30 @@ la rete dell'ufficio (es. `192.168.1.0/24`) deve essere tra gli "IP consentiti" 
 
 ---
 
+## 10. Cruscotto per gli uffici comunali
+
+Gli operatori del Comune gestiscono le segnalazioni da computer su **`https://IP-DEL-SERVER/ufficio`**:
+indicatori, grafico per categoria, mappa, elenco filtrabile, esportazione CSV, presa in carico /
+risoluzione / respingimento con email automatica al cittadino, note interne e storico.
+
+**Creare gli operatori**
+1. Nel file `.env` imposta `ADMIN_EMAIL` e `ADMIN_PASSWORD`, poi `docker compose up -d`:
+   al riavvio viene creato l'account amministratore.
+2. Accedi con quell'account: vieni portato su `/ufficio`. Apri **Operatori**, scegli il Comune,
+   inserisci nome, email e una password iniziale.
+3. L'operatore accede da `/accedi` con quelle credenziali e vede **solo** le segnalazioni del suo Comune
+   (può cambiare la password con "Password dimenticata").
+
+**Dati dimostrativi (per presentazioni)**
+```powershell
+docker compose exec app npm run db:demo             # crea ~26 segnalazioni finte a Messina
+docker compose exec app npm run db:demo -- --remove # le cancella tutte
+```
+Accesso demo: `operatore@demo.civicalert.local` / `demo-civicalert`. Le foto sono riquadri con la scritta
+"FOTO DIMOSTRATIVA" e nessuna PEC viene inviata. Ricordati di rimuoverli prima dell'uso reale.
+
+---
+
 ## Comandi utili
 
 | Cosa | Comando (da `C:\civicalert`) |

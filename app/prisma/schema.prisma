@@ -34,6 +34,7 @@ model User {
   lastLoginAt       DateTime? @map("last_login_at")
 
   reports Report[]
+  events  ReportEvent[]
 
   @@map("users")
 }
@@ -111,8 +112,10 @@ model Report {
   updatedAt       DateTime      @updatedAt @map("updated_at")
 
   deliveries Delivery[]
+  events     ReportEvent[]
 
   @@index([categoryId, status])
+  @@index([municipalityId, status])
   @@index([userId, createdAt])
   @@map("reports")
 }
@@ -159,4 +162,27 @@ enum DeliveryStatus {
   PENDING
   SENT
   FAILED // tentativi esauriti
+}
+
+// ── Storico della segnalazione (cambi di stato, note dell'ufficio) ───────────
+model ReportEvent {
+  id                String        @id @default(uuid())
+  reportId          String        @map("report_id")
+  report            Report        @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  actorId           String?       @map("actor_id")
+  actor             User?         @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  kind              EventKind
+  fromStatus        ReportStatus? @map("from_status")
+  toStatus          ReportStatus? @map("to_status")
+  note              String?
+  visibleToCitizen  Boolean       @default(false) @map("visible_to_citizen")
+  createdAt         DateTime      @default(now()) @map("created_at")
+
+  @@index([reportId, createdAt])
+  @@map("report_events")
+}
+
+enum EventKind {
+  STATUS // cambio di stato
+  NOTE   // nota interna dell'ufficio
 }

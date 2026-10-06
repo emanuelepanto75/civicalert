@@ -6,8 +6,9 @@ const ITALY = { center: [41.9, 12.5], zoom: 6 };
 const escape = (s) =>
   String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
-// Mappa pubblica delle segnalazioni (OpenStreetMap + Leaflet).
-export default function ReportsMap() {
+// Mappa delle segnalazioni (OpenStreetMap + Leaflet). Senza `reports` carica la
+// mappa pubblica; il cruscotto dell'ufficio passa invece le segnalazioni filtrate.
+export default function ReportsMap({ reports: given = null, linkBase = '/segnalazioni/', legend = true }) {
   const container = useRef(null);
   const [count, setCount] = useState(null);
 
@@ -25,9 +26,9 @@ export default function ReportsMap() {
         attribution: '&copy; OpenStreetMap',
       }).addTo(map);
 
-      const res = await fetch('/api/reports').then((r) => r.json()).catch(() => ({ reports: [] }));
+      const reports =
+        given ?? ((await fetch('/api/reports').then((r) => r.json()).catch(() => ({}))).reports || []);
       if (cancelled) return;
-      const reports = res.reports || [];
       setCount(reports.length);
 
       const markers = reports.map((r) => {
@@ -45,7 +46,7 @@ export default function ReportsMap() {
            <div class="muted small">📍 ${escape(r.address || r.municipality || '')}</div>
            ${img}
            <span class="badge ${r.status}">${escape(r.statusLabel)}</span>
-           <div style="margin-top:8px"><a href="/segnalazioni/${r.code}">Dettaglio →</a></div>`,
+           <div style="margin-top:8px"><a href="${linkBase}${r.code}">Dettaglio →</a></div>`,
           { maxWidth: 240 },
         );
       });
@@ -66,12 +67,12 @@ export default function ReportsMap() {
       cancelled = true;
       map?.remove();
     };
-  }, []);
+  }, [given, linkBase]);
 
   return (
     <>
       <div ref={container} className="map" />
-      {count !== null && (
+      {legend && count !== null && (
         <div className="map-legend">
           {count === 0 ? 'Nessuna segnalazione ancora' : `${count} segnalazioni`}
         </div>

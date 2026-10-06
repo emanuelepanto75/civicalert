@@ -12,9 +12,22 @@ export async function POST(request, { params }) {
   if (!report || report.userId !== user.id) return jsonError('Segnalazione non trovata', 404);
   if (report.status === 'RESOLVED' || report.status === 'REJECTED') return jsonError('La segnalazione è già chiusa');
 
-  await prisma.report.update({
-    where: { id: report.id },
-    data: { status: 'RESOLVED', resolvedAt: new Date(), resolvedBy: 'CITIZEN' },
-  });
+  await prisma.$transaction([
+    prisma.report.update({
+      where: { id: report.id },
+      data: { status: 'RESOLVED', resolvedAt: new Date(), resolvedBy: 'CITIZEN' },
+    }),
+    prisma.reportEvent.create({
+      data: {
+        reportId: report.id,
+        actorId: user.id,
+        kind: 'STATUS',
+        fromStatus: report.status,
+        toStatus: 'RESOLVED',
+        note: 'Confermata risolta dal cittadino',
+        visibleToCitizen: true,
+      },
+    }),
+  ]);
   return NextResponse.json({ ok: true });
 }

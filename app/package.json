@@ -11,7 +11,8 @@
     "db:seed": "node prisma/seed.mjs",
     "db:studio": "prisma studio",
     "start:prod": "prisma migrate deploy && node prisma/seed.mjs && next start -H 0.0.0.0 -p 3000",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:demo": "node prisma/demo.mjs"
   },
   "dependencies": {
     "@prisma/client": "~6.19.3",

@@ -20,3 +20,8 @@ export function publicUser(user) {
     role: user.role,
   };
 }
+
+// Operatori comunali (con un Comune assegnato) e amministratori.
+export function isStaff(user) {
+  return user?.role === 'ADMIN' || (user?.role === 'OPERATOR' && Boolean(user.municipalityId));
+}

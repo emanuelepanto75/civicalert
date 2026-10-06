@@ -19,6 +19,7 @@ automaticamente fra i 7.904 comuni italiani.
 | 🛡 Controlli | Duplicati (stessa categoria entro 50 m ancora aperta), limite giornaliero anti-spam, avvisi di autenticità (foto vecchia o scattata altrove, GPS impreciso) |
 | ✅ Chiusura | Il cittadino può segnare la segnalazione come risolta |
 | 🗺 Mappa pubblica | Tutte le segnalazioni, senza dati personali dei segnalanti |
+| 🏛 Cruscotto ufficio (`/ufficio`) | Per gli operatori comunali: indicatori, grafico per categoria, mappa, filtri, esportazione CSV, presa in carico / risoluzione / respingimento con email al cittadino, note interne e storico. L'amministratore crea gli operatori e li assegna al Comune |
 | 📱 PWA | Installabile sulla schermata Home di iPhone e Android |
 
 ## Avvio

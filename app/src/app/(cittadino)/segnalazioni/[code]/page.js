@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { publicReport } from '@/lib/reports';
+import { STATUS_LABELS, publicReport } from '@/lib/reports';
 import ResolveButton from './ResolveButton';
 
 export const dynamic = 'force-dynamic';
@@ -13,7 +13,12 @@ export default async function ReportDetailPage({ params }) {
   const { code } = await params;
   const raw = await prisma.report.findUnique({
     where: { code },
-    include: { category: true, municipality: true, deliveries: true },
+    include: {
+      category: true,
+      municipality: true,
+      deliveries: true,
+      events: { where: { kind: 'STATUS', visibleToCitizen: true }, orderBy: { createdAt: 'asc' } },
+    },
   });
   if (!raw) notFound();
   const user = await getCurrentUser();
@@ -65,6 +70,23 @@ export default async function ReportDetailPage({ params }) {
                   {d.status === 'SENT' && `Inviata il ${fmt(d.sentAt)}`}
                   {d.status === 'PENDING' && `In invio (tentativi: ${d.attempts})`}
                   {d.status === 'FAILED' && 'Invio non riuscito dopo 3 tentativi'}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {isOwner && raw.events.length > 0 && (
+        <div className="card">
+          <div className="card-body">
+            <div className="steps-label">Aggiornamenti</div>
+            {raw.events.map((e) => (
+              <div key={e.id} className="kv">
+                <span className="k">{fmt(e.createdAt)}</span>
+                <span className="v">
+                  <span className={`badge ${e.toStatus}`}>{STATUS_LABELS[e.toStatus]}</span>
+                  {e.note && <span style={{ display: 'block', marginTop: 4 }}>{e.note}</span>}
                 </span>
               </div>
             ))}

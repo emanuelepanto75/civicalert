@@ -18,9 +18,11 @@ export default function LoginForm({ verifica, next, registrato }) {
     setError(null);
     setInfo(null);
     try {
-      await api('/api/auth/login', { body: { email, password } });
+      const { user } = await api('/api/auth/login', { body: { email, password } });
+      // gli operatori comunali vanno direttamente al cruscotto dell'ufficio
+      const staff = user.role !== 'CITIZEN';
       // navigazione completa: aggiorna anche l'intestazione con il nome utente
-      window.location.href = next;
+      window.location.href = staff && next === '/' ? '/ufficio' : next;
     } catch (err) {
       setError(err.message);
       setNeedsVerification(Boolean(err.needsVerification));
