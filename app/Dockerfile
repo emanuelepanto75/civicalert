@@ -1,8 +1,8 @@
 FROM node:22-bookworm-slim
 
-# openssl serve a Prisma
+# openssl serve a Prisma; i font servono a disegnare le scritte delle foto dimostrative
 RUN apt-get update \
- && apt-get install -y --no-install-recommends openssl ca-certificates \
+ && apt-get install -y --no-install-recommends openssl ca-certificates fontconfig fonts-dejavu-core \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
