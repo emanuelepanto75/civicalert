@@ -204,6 +204,13 @@ docker compose exec app node prisma/demo.mjs --remove   # le cancella tutte
 Accesso demo: `operatore@demo.civicalert.local` / `demo-civicalert`. Le foto sono riquadri con la scritta
 "FOTO DIMOSTRATIVA" e nessuna PEC viene inviata. Ricordati di rimuoverli prima dell'uso reale.
 
+**Utenti registrati durante le prove**
+```powershell
+docker compose exec app node prisma/utenti.mjs                                   # elenca gli utenti
+docker compose exec app node prisma/utenti.mjs --elimina prova@email.it altra@email.it  # elimina utenti, segnalazioni e foto
+```
+Gli amministratori non vengono mai eliminati da questo comando.
+
 ---
 
 ## Comandi utili
