@@ -1,4 +1,4 @@
-# CivicAlert – installazione locale (rete di casa/ufficio + VPN)
+# CivicAlerts – installazione locale (rete di casa/ufficio + VPN)
 # Avvio:   docker compose up -d --build
 # Log:     docker compose logs -f app
 # Stop:    docker compose down
@@ -43,7 +43,7 @@ services:
       SMTP_PORT: ${SMTP_PORT:-1025}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
-      MAIL_FROM: ${MAIL_FROM:-CivicAlert <segnalazioni@civicalert.local>}
+      MAIL_FROM: ${MAIL_FROM:-CivicAlerts <segnalazioni@civicalert.local>}
       PEC_OVERRIDE_TO: ${PEC_OVERRIDE_TO:-}
       NOMINATIM_EMAIL: ${NOMINATIM_EMAIL:-}
     volumes:

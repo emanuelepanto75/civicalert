@@ -1,4 +1,4 @@
-# CivicAlert
+# CivicAlerts
 
 Segnalazione civica certificata: il cittadino fotografa un problema (buca,
 lampione spento, rifiuti…), il telefono rileva la posizione GPS e la

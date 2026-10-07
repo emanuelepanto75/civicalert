@@ -14,9 +14,9 @@ export function sendVerificationEmail(user, siteUrl) {
   const link = `${siteUrl}/api/auth/verify?token=${user.verifyToken}`;
   return sendMail({
     to: user.email,
-    subject: 'CivicAlert – conferma il tuo indirizzo email',
+    subject: 'CivicAlerts – conferma il tuo indirizzo email',
     html: layout(
-      `Ciao ${user.firstName}, benvenuto in CivicAlert!`,
+      `Ciao ${user.firstName}, benvenuto in CivicAlerts!`,
       'Per attivare il tuo account conferma il tuo indirizzo email.',
       link,
       'Conferma email',
@@ -29,7 +29,7 @@ export function sendResetEmail(user, siteUrl) {
   const link = `${siteUrl}/reimposta-password?token=${user.resetToken}`;
   return sendMail({
     to: user.email,
-    subject: 'CivicAlert – reimposta la password',
+    subject: 'CivicAlerts – reimposta la password',
     html: layout(
       'Reimposta la password',
       'Hai chiesto di reimpostare la password. Il link vale 1 ora; se non sei stato tu ignora questa email.',
@@ -54,7 +54,7 @@ export function sendStatusEmail({ report, toStatus, note, siteUrl }) {
     : '';
   return sendMail({
     to: report.user.email,
-    subject: `CivicAlert – la segnalazione ${report.code} ${what}`,
+    subject: `CivicAlerts – la segnalazione ${report.code} ${what}`,
     html: layout(
       `Aggiornamento sulla segnalazione ${report.code}`,
       `Ciao ${escapeHtml(report.user.firstName)}, la tua segnalazione “${escapeHtml(report.category.name)}” ${what}.${noteHtml}`,

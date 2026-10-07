@@ -1,4 +1,4 @@
-# CivicAlert – reverse proxy con HTTPS locale.
+# CivicAlerts – reverse proxy con HTTPS locale.
 # Caddy crea una propria autorità di certificazione (CA) interna: basta
 # installarne il certificato radice sul telefono una volta sola.
 {
@@ -29,7 +29,7 @@ http:// {
 		root * /data/caddy/pki/authorities/local
 		rewrite * /root.crt
 		header Content-Type application/x-x509-ca-cert
-		header Content-Disposition "attachment; filename=CivicAlert-CA.crt"
+		header Content-Disposition "attachment; filename=CivicAlerts-CA.crt"
 		file_server
 	}
 
@@ -38,15 +38,15 @@ http:// {
 		respond <<HTML
 			<!doctype html>
 			<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-			<title>CivicAlert – installazione</title></head>
+			<title>CivicAlerts – installazione</title></head>
 			<body style="font-family:system-ui;max-width:520px;margin:auto;padding:24px;color:#111827;line-height:1.5">
-			<h2 style="color:#1A3A6B">CivicAlert</h2>
+			<h2 style="color:#1A3A6B">CivicAlerts</h2>
 			<p><b>1.</b> La prima volta, scarica e installa il certificato di sicurezza:</p>
 			<p><a href="/certificato.crt" style="display:inline-block;background:#E85D04;color:#fff;padding:12px 18px;border-radius:12px;text-decoration:none;font-weight:bold">Scarica certificato</a></p>
 			<p style="font-size:14px"><b>iPhone:</b> Impostazioni › Profilo scaricato › Installa, poi Impostazioni › Generali › Info › Impostazioni certificati attendibili › attiva “Caddy Local Authority”.<br>
 			<b>Android:</b> Impostazioni › Sicurezza › Crittografia e credenziali › Installa un certificato › Certificato CA.</p>
 			<p><b>2.</b> Poi apri l’app:</p>
-			<p><a href="https://{host}/" style="display:inline-block;background:#1A3A6B;color:#fff;padding:12px 18px;border-radius:12px;text-decoration:none;font-weight:bold">Apri CivicAlert</a></p>
+			<p><a href="https://{host}/" style="display:inline-block;background:#1A3A6B;color:#fff;padding:12px 18px;border-radius:12px;text-decoration:none;font-weight:bold">Apri CivicAlerts</a></p>
 			</body></html>
 			HTML 200
 	}

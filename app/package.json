@@ -2,7 +2,7 @@
   "name": "civicalert",
   "version": "0.1.0",
   "private": true,
-  "description": "CivicAlert – segnalazioni civiche certificate (PWA + API)",
+  "description": "CivicAlerts – segnalazioni civiche certificate (PWA + API)",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",

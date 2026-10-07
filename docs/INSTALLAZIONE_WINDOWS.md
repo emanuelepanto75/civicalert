@@ -1,6 +1,6 @@
-# Installazione di CivicAlert sul server Windows
+# Installazione di CivicAlerts sul server Windows
 
-Questa guida installa CivicAlert sul server di casa/ufficio. L'app sarà
+Questa guida installa CivicAlerts sul server di casa/ufficio. L'app sarà
 raggiungibile **solo dalla tua rete** (Wi-Fi o cavo) e dai telefoni
 **collegati alla VPN**. Nessun servizio esterno da configurare.
 
@@ -100,7 +100,7 @@ In **PowerShell come amministratore**:
 Get-NetConnectionProfile
 Set-NetConnectionProfile -InterfaceAlias "Ethernet" -NetworkCategory Private   # usa il nome mostrato sopra
 
-New-NetFirewallRule -DisplayName "CivicAlert" -Direction Inbound -Protocol TCP -LocalPort 80,443 -Action Allow -Profile Private,Domain
+New-NetFirewallRule -DisplayName "CivicAlerts" -Direction Inbound -Protocol TCP -LocalPort 80,443 -Action Allow -Profile Private,Domain
 ```
 
 Le porte 80/443 vengono aperte **solo verso la rete locale**: non serve (e non va fatto)
@@ -126,7 +126,7 @@ docker compose logs app    # deve comparire "Importati 7904 comuni" e "Ready"
 Prova dal browser del server: <https://localhost>. Comparirà un avviso di sicurezza
 perché il certificato non è ancora installato (vedi il passo 8 per installarlo anche sul PC).
 
-Da qui in poi CivicAlert **ripartirà da solo** a ogni riavvio del server.
+Da qui in poi CivicAlerts **ripartirà da solo** a ogni riavvio del server.
 
 ---
 
@@ -144,10 +144,10 @@ Il telefono deve essere sulla stessa rete Wi-Fi del server, oppure collegato all
    **attiva** l'interruttore di **"Caddy Local Authority"**. ← passaggio spesso dimenticato
 
 ### Android
-1. Il file `CivicAlert-CA.crt` viene scaricato.
+1. Il file `CivicAlerts-CA.crt` viene scaricato.
 2. Apri **Impostazioni › Sicurezza** (o "Sicurezza e privacy") › **Altre impostazioni di sicurezza** ›
    **Crittografia e credenziali** › **Installa un certificato** › **Certificato CA** ›
-   **Installa comunque** › scegli `CivicAlert-CA.crt` dai Download.
+   **Installa comunque** › scegli `CivicAlerts-CA.crt` dai Download.
    (Il percorso cambia un po' tra le marche: cerca "certificato CA" nelle Impostazioni.)
 3. Chiudi e riapri Chrome.
 
@@ -175,7 +175,7 @@ inviate ai Comuni**, con la foto allegata.
 
 Collegato alla VPN, il telefono deve usare **lo stesso indirizzo `https://IP-DEL-SERVER`**
 della rete locale (non l'eventuale indirizzo della VPN). Verifica così: disattiva il Wi-Fi,
-attiva la VPN in 4G/5G e apri `http://IP-DEL-SERVER`: se compare la pagina CivicAlert, funziona.
+attiva la VPN in 4G/5G e apri `http://IP-DEL-SERVER`: se compare la pagina CivicAlerts, funziona.
 
 Se non si apre, la VPN non instrada la rete locale: nella configurazione della VPN
 la rete dell'ufficio (es. `192.168.1.0/24`) deve essere tra gli "IP consentiti" / "rotte".
@@ -224,7 +224,7 @@ Accesso demo: `operatore@demo.civicalert.local` / `demo-civicalert`. Le foto son
 
 1. Prova lo script una volta: `powershell -ExecutionPolicy Bypass -File C:\civicalert\scripts\backup.ps1`
    Crea `C:\civicalert\backup\<data>\` con `database.dump` e la cartella `uploads`.
-2. Apri **Utilità di pianificazione** › Crea attività di base › "Backup CivicAlert" › Giornaliera, ore 03:00 ›
+2. Apri **Utilità di pianificazione** › Crea attività di base › "Backup CivicAlerts" › Giornaliera, ore 03:00 ›
    Avvio programma: `powershell.exe`, argomenti:
    `-ExecutionPolicy Bypass -File C:\civicalert\scripts\backup.ps1`
 3. Copia periodicamente la cartella `backup` **fuori dal server** (disco esterno o cloud).

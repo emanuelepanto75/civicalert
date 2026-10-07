@@ -1,5 +1,5 @@
 #!/bin/sh
-# Backup di CivicAlert su server Linux: database + foto/video.
+# Backup di CivicAlerts su server Linux: database + foto/video.
 # Uso:  ./scripts/backup.sh          (dalla cartella del progetto)
 # Ogni notte alle 3:  crontab -e  →  0 3 * * * cd /opt/civicalert && ./scripts/backup.sh >> /var/log/civicalert-backup.log 2>&1
 set -eu

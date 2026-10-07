@@ -36,7 +36,7 @@ async function nominatimReverse(lat, lon) {
 
   const data = await throttled(async () => {
     const res = await fetch(url, {
-      headers: { 'User-Agent': 'CivicAlert/0.1 (segnalazioni civiche)' },
+      headers: { 'User-Agent': 'CivicAlerts/0.1 (segnalazioni civiche)' },
       signal: AbortSignal.timeout(10000),
     });
     if (!res.ok) throw new Error(`Nominatim HTTP ${res.status}`);

@@ -1,4 +1,4 @@
-export const metadata = { title: 'Privacy – CivicAlert' };
+export const metadata = { title: 'Privacy – CivicAlerts' };
 
 // Testo provvisorio: da far rivedere prima della messa in produzione.
 export default function PrivacyPage() {

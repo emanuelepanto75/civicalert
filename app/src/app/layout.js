@@ -3,10 +3,10 @@ import './globals.css';
 import ServiceWorker from '@/components/ServiceWorker';
 
 export const metadata = {
-  title: 'CivicAlert',
+  title: 'CivicAlerts',
   description: 'Segnala buche, rifiuti e problemi stradali al tuo Comune via PEC.',
   manifest: '/manifest.webmanifest',
-  appleWebApp: { capable: true, title: 'CivicAlert', statusBarStyle: 'black-translucent' },
+  appleWebApp: { capable: true, title: 'CivicAlerts', statusBarStyle: 'black-translucent' },
   icons: { icon: '/icons/icon-192.png', apple: '/icons/apple-touch-icon.png' },
 };
 

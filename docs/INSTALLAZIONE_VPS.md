@@ -1,6 +1,6 @@
-# Installazione di CivicAlert su server cloud (Aruba Cloud VPS)
+# Installazione di CivicAlerts su server cloud (Aruba Cloud VPS)
 
-Questa guida porta CivicAlert online su **https://civicalerts.it**, con certificato
+Questa guida porta CivicAlerts online su **https://civicalerts.it**, con certificato
 HTTPS automatico (nessun certificato da installare sui telefoni), email reali ai
 cittadini e PEC ai Comuni.
 

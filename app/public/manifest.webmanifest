@@ -1,6 +1,6 @@
 {
-  "name": "CivicAlert – Segnalazioni civiche",
-  "short_name": "CivicAlert",
+  "name": "CivicAlerts – Segnalazioni civiche",
+  "short_name": "CivicAlerts",
   "description": "Segnala buche, rifiuti e problemi stradali al tuo Comune via PEC.",
   "lang": "it",
   "start_url": "/",

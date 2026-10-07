@@ -3,7 +3,7 @@ import LogoutButton from '@/components/office/LogoutButton';
 import { requireStaffPage } from '@/lib/office';
 import { prisma } from '@/lib/db';
 
-export const metadata = { title: 'Ufficio segnalazioni – CivicAlert' };
+export const metadata = { title: 'Ufficio segnalazioni – CivicAlerts' };
 
 // Layout del cruscotto per gli uffici comunali (pensato per il computer).
 export default async function OfficeLayout({ children }) {
@@ -17,7 +17,7 @@ export default async function OfficeLayout({ children }) {
         <Link href="/ufficio" className="logo">
           <span className="logo-icon">🛡</span>
           <span>
-            Civic<span>Alert</span>
+            Civic<span>Alerts</span>
             <span className="logo-sub">Ufficio segnalazioni</span>
           </span>
         </Link>

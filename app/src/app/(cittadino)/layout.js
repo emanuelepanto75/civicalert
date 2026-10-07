@@ -11,7 +11,7 @@ export default async function CitizenLayout({ children }) {
         <Link href="/" className="logo">
           <span className="logo-icon">🛡</span>
           <span>
-            Civic<span>Alert</span>
+            Civic<span>Alerts</span>
           </span>
         </Link>
         <div className="topbar-right">

@@ -19,7 +19,7 @@ export async function sendReportPec({ report, recipient, siteUrl }) {
   const { user, category, municipality } = report;
   const mapsUrl = `https://www.openstreetmap.org/?mlat=${report.latitude}&mlon=${report.longitude}#map=19/${report.latitude}/${report.longitude}`;
   const detailUrl = `${siteUrl}/segnalazioni/${report.code}`;
-  const subject = `[CivicAlert] Segnalazione ${report.code} – ${category.name} – ${municipality?.name ?? ''}`;
+  const subject = `[CivicAlerts] Segnalazione ${report.code} – ${category.name} – ${municipality?.name ?? ''}`;
 
   const rows = [
     ['Codice segnalazione', report.code],
@@ -39,7 +39,7 @@ export async function sendReportPec({ report, recipient, siteUrl }) {
   <p style="margin:4px 0 0;opacity:.85">Comune di ${escapeHtml(municipality?.name)}</p>
 </div>
 <div style="padding:24px">
-  <p>Si trasmette la seguente segnalazione inviata da un cittadino tramite la piattaforma CivicAlert.</p>
+  <p>Si trasmette la seguente segnalazione inviata da un cittadino tramite la piattaforma CivicAlerts.</p>
   <table style="border-collapse:collapse;width:100%">
     ${rows
       .map(

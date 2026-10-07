@@ -1,4 +1,4 @@
-# CivicAlert – produzione su server cloud (VPS) con dominio pubblico.
+# CivicAlerts – produzione su server cloud (VPS) con dominio pubblico.
 # Sul server, nel file .env: COMPOSE_FILE=docker-compose.prod.yml
 # così bastano i soliti comandi: docker compose up -d --build / logs / ps
 # Guida: docs/INSTALLAZIONE_VPS.md

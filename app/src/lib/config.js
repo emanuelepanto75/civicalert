@@ -27,7 +27,7 @@ export const config = {
     user: process.env.SMTP_USER || '',
     pass: process.env.SMTP_PASS || '',
   },
-  mailFrom: process.env.MAIL_FROM || 'CivicAlert <segnalazioni@civicalert.local>',
+  mailFrom: process.env.MAIL_FROM || 'CivicAlerts <segnalazioni@civicalert.local>',
   // Casella PEC per le segnalazioni ai Comuni. Se non configurata si usa la
   // casella normale (in locale: Mailpit).
   pecSmtp: {
@@ -36,7 +36,7 @@ export const config = {
     user: process.env.PEC_SMTP_HOST ? process.env.PEC_SMTP_USER || '' : process.env.SMTP_USER || '',
     pass: process.env.PEC_SMTP_HOST ? process.env.PEC_SMTP_PASS || '' : process.env.SMTP_PASS || '',
   },
-  pecFrom: process.env.PEC_FROM || process.env.MAIL_FROM || 'CivicAlert <segnalazioni@civicalert.local>',
+  pecFrom: process.env.PEC_FROM || process.env.MAIL_FROM || 'CivicAlerts <segnalazioni@civicalert.local>',
   // Se impostato, TUTTE le PEC vengono dirottate qui invece che ai comuni (utile nei test).
   pecOverrideTo: process.env.PEC_OVERRIDE_TO || '',
   nominatimUrl: process.env.NOMINATIM_URL || 'https://nominatim.openstreetmap.org',

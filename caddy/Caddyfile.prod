@@ -1,4 +1,4 @@
-# CivicAlert – produzione. Caddy ottiene e rinnova da solo il certificato
+# CivicAlerts – produzione. Caddy ottiene e rinnova da solo il certificato
 # HTTPS (Let's Encrypt) per il dominio: nessun certificato da installare
 # sui telefoni.
 {

@@ -77,7 +77,7 @@ async function seedAdmin() {
       email,
       phone: '',
       firstName: 'Amministratore',
-      lastName: 'CivicAlert',
+      lastName: 'CivicAlerts',
       role: 'ADMIN',
       passwordHash: await bcrypt.hash(ADMIN_PASSWORD, 12),
       privacyAcceptedAt: new Date(),

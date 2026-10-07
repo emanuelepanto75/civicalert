@@ -3,7 +3,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import ReportWizard from './ReportWizard';
 
-export const metadata = { title: 'Nuova segnalazione – CivicAlert' };
+export const metadata = { title: 'Nuova segnalazione – CivicAlerts' };
 
 export default async function NewReportPage() {
   const user = await getCurrentUser();

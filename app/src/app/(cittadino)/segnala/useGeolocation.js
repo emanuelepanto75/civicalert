@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 const MESSAGES = {
   insecure:
-    'Il GPS funziona solo con connessione sicura (https). Apri l’app dall’indirizzo https:// e verifica di aver installato il certificato CivicAlert sul telefono.',
+    'Il GPS funziona solo con connessione sicura (https). Apri l’app dall’indirizzo https:// e verifica di aver installato il certificato CivicAlerts sul telefono.',
   unsupported: 'Questo browser non supporta la geolocalizzazione.',
   1: 'Permesso posizione negato. Abilitalo nelle impostazioni del browser per questo sito e riprova.',
   2: 'Posizione non disponibile. Attiva il GPS e riprova.',

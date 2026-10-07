@@ -4,7 +4,7 @@ import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { publicReport } from '@/lib/reports';
 
-export const metadata = { title: 'Le mie segnalazioni – CivicAlert' };
+export const metadata = { title: 'Le mie segnalazioni – CivicAlerts' };
 export const dynamic = 'force-dynamic';
 
 export default async function MyReportsPage() {
