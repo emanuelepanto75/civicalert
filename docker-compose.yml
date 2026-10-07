@@ -44,6 +44,12 @@ services:
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
       MAIL_FROM: ${MAIL_FROM:-CivicAlerts <segnalazioni@civicalert.local>}
+      # PEC ai Comuni: se PEC_SMTP_HOST è vuoto usa la stessa posta di sopra
+      PEC_SMTP_HOST: ${PEC_SMTP_HOST:-}
+      PEC_SMTP_PORT: ${PEC_SMTP_PORT:-}
+      PEC_SMTP_USER: ${PEC_SMTP_USER:-}
+      PEC_SMTP_PASS: ${PEC_SMTP_PASS:-}
+      PEC_FROM: ${PEC_FROM:-}
       PEC_OVERRIDE_TO: ${PEC_OVERRIDE_TO:-}
       NOMINATIM_EMAIL: ${NOMINATIM_EMAIL:-}
     volumes:
