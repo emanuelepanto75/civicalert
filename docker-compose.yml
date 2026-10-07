@@ -74,10 +74,13 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "443:443/udp"
     environment:
       SERVER_IP: ${SERVER_IP:?Imposta SERVER_IP nel file .env}
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy/pubblico:/etc/caddy/pubblico:ro # accesso da internet (facoltativo)
+      - ./site:/srv/sito:ro # pagina di presentazione civicalerts.it
       - caddy_data:/data
       - caddy_config:/config
 

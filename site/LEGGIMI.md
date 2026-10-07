@@ -1,6 +1,7 @@
 # Sito di presentazione – civicalerts.it
 
-Pagina statica (nessun cookie, nessun dato raccolto). Si pubblica gratis su Netlify:
+Pagina statica (nessun cookie, nessun dato raccolto). Si può pubblicare dal server di casa
+(vedi `docs/SERVER_CASA_INTERNET.md`) oppure gratis su Netlify:
 
 1. Vai su https://app.netlify.com/drop (account gratuito) e trascina la cartella `site`.
 2. In *Domain management* aggiungi il dominio `civicalerts.it`.

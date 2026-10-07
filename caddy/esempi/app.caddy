@@ -1,0 +1,24 @@
+# App su https://app.civicalerts.it, raggiungibile da internet senza
+# installare certificati sui telefoni (richiede il record DNS "app").
+# Per attivarla: copia questo file in caddy/pubblico/ e riavvia Caddy.
+# La casella di prova Mailpit NON è esposta su internet.
+
+http://app.civicalerts.it {
+	redir https://app.civicalerts.it{uri} permanent
+}
+
+https://app.civicalerts.it {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+	handle /mailpit* {
+		respond 404
+	}
+	handle {
+		reverse_proxy app:3000
+	}
+}

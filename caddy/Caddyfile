@@ -51,3 +51,7 @@ http:// {
 			HTML 200
 	}
 }
+
+# Accesso da internet con il dominio (facoltativo): qui vengono caricati i file
+# *.caddy copiati in caddy/pubblico/. Vedi docs/SERVER_CASA_INTERNET.md.
+import /etc/caddy/pubblico/*.caddy
