@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { config } from './config';
-import { escapeHtml, sendMail } from './mailer';
+import { escapeHtml, sendPec } from './mailer';
 
 function formatDate(date) {
   return new Date(date).toLocaleString('it-IT', {
@@ -59,7 +59,7 @@ export async function sendReportPec({ report, recipient, siteUrl }) {
     ? [{ filename: `${report.code}${path.extname(report.mediaPath)}`, path: path.join(config.uploadDir, report.mediaPath) }]
     : [];
 
-  const info = await sendMail({
+  const info = await sendPec({
     to: config.pecOverrideTo || recipient,
     replyTo: user?.email,
     subject,

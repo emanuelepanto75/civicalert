@@ -1,0 +1,81 @@
+# CivicAlert – produzione su server cloud (VPS) con dominio pubblico.
+# Sul server, nel file .env: COMPOSE_FILE=docker-compose.prod.yml
+# così bastano i soliti comandi: docker compose up -d --build / logs / ps
+# Guida: docs/INSTALLAZIONE_VPS.md
+
+name: civicalert
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: civicalert
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Imposta DB_PASSWORD nel file .env}
+      POSTGRES_DB: civicalert
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U civicalert"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build: ./app
+    restart: unless-stopped
+    init: true
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://civicalert:${DB_PASSWORD}@db:5432/civicalert
+      PUBLIC_URL: https://${DOMAIN:?Imposta DOMAIN nel file .env}
+      COOKIE_SECURE: "true"
+      REQUIRE_EMAIL_VERIFICATION: ${REQUIRE_EMAIL_VERIFICATION:-true}
+      MAX_REPORTS_PER_DAY: ${MAX_REPORTS_PER_DAY:-5}
+      DUPLICATE_RADIUS_M: ${DUPLICATE_RADIUS_M:-50}
+      MAX_GPS_ACCURACY_M: ${MAX_GPS_ACCURACY_M:-200}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-50}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      # Email ai cittadini (conferme, avvisi): casella normale del dominio
+      SMTP_HOST: ${SMTP_HOST:?Imposta SMTP_HOST nel file .env}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_USER: ${SMTP_USER:?Imposta SMTP_USER nel file .env}
+      SMTP_PASS: ${SMTP_PASS:?Imposta SMTP_PASS nel file .env}
+      MAIL_FROM: ${MAIL_FROM:?Imposta MAIL_FROM nel file .env}
+      # Segnalazioni ai Comuni: casella PEC
+      PEC_SMTP_HOST: ${PEC_SMTP_HOST:?Imposta PEC_SMTP_HOST nel file .env}
+      PEC_SMTP_PORT: ${PEC_SMTP_PORT:-465}
+      PEC_SMTP_USER: ${PEC_SMTP_USER:?Imposta PEC_SMTP_USER nel file .env}
+      PEC_SMTP_PASS: ${PEC_SMTP_PASS:?Imposta PEC_SMTP_PASS nel file .env}
+      PEC_FROM: ${PEC_FROM:?Imposta PEC_FROM nel file .env}
+      # Collaudo: se impostato, TUTTE le PEC vanno a questo indirizzo e non ai Comuni
+      PEC_OVERRIDE_TO: ${PEC_OVERRIDE_TO:-}
+      NOMINATIM_EMAIL: ${NOMINATIM_EMAIL:-}
+    volumes:
+      - app_data:/data
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL:?Imposta ACME_EMAIL nel file .env}
+    volumes:
+      - ./caddy/Caddyfile.prod:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  db_data:
+  app_data:
+  caddy_data:
+  caddy_config:

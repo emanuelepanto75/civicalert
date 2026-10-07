@@ -36,6 +36,9 @@ docker compose up -d --build
 
 Dal telefono: `http://IP-DEL-SERVER` → installa il certificato → apri l'app.
 
+**Produzione su server cloud** (dominio pubblico, HTTPS automatico, email e PEC reali):
+**[docs/INSTALLAZIONE_VPS.md](docs/INSTALLAZIONE_VPS.md)** – usa `docker-compose.prod.yml`, `caddy/Caddyfile.prod` e `.env.prod.example`.
+
 ## Struttura
 
 ```
