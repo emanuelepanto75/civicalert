@@ -263,4 +263,5 @@ docker compose cp backup\<data>\uploads\. app:/data/uploads
 | "Il GPS funziona solo con connessione sicura" | Stai usando `http://`: apri `https://IP-DEL-SERVER` |
 | "Permesso posizione negato" | iPhone: Impostazioni › Privacy › Localizzazione › Safari › "Mentre usi l'app". Android: tieni premuto il lucchetto nella barra indirizzi › Autorizzazioni › Posizione |
 | Comune non identificato | Il server non raggiunge internet, oppure la posizione è fuori dall'Italia |
+| PEC "Non consegnata" con errore `535 Authentication failed` | Utente o password della casella rifiutati. Se sulla PEC è attiva la verifica in due passaggi, in `PEC_SMTP_PASS` va la **password per le applicazioni** generata da Aruba. Dopo la modifica: `docker compose up -d`, poi **Riprova** in Invii PEC |
 | L'IP del server è cambiato | Aggiorna `SERVER_IP` nel file `.env` ed esegui `docker compose up -d`: il certificato già installato sui telefoni resta valido |

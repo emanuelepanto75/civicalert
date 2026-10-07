@@ -192,7 +192,8 @@ Mai `docker compose down -v`: cancella database e foto.
 | Caddy non ottiene il certificato | DNS non ancora propagato, o porte 80/443 chiuse: attendi e controlla `docker compose logs caddy` |
 | La build si blocca o va in errore di memoria | il server ha meno di 4 GB di RAM: passa al piano O2A4 o superiore |
 | Le email non arrivano | password o utente SMTP errati: `docker compose logs app` mostra l'errore; controlla anche lo spam |
-| Le PEC non partono | parametri PEC errati o limiti di invio della casella: chiedi ad Aruba i limiti giornalieri |
+| Le PEC non partono con errore `535 Authentication failed` | se sulla casella è attiva la verifica in due passaggi, in `PEC_SMTP_PASS` serve la **password per le applicazioni** generata da Aruba, non quella della casella (vale anche per l'email del dominio) |
+| Le PEC non partono (altri errori) | parametri PEC errati o limiti di invio della casella: chiedi ad Aruba i limiti giornalieri. In `/ufficio/pec` trovi l'errore e il pulsante Riprova |
 
 ## Prima del lancio pubblico
 
