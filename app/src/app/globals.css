@@ -255,9 +255,28 @@ a.kpi:hover { border-color: #93c5fd; }
 .tl-item .when { font-size: 12px; color: var(--muted); }
 .actions-row { display: flex; flex-wrap: wrap; gap: 8px; }
 
+/* Amministrazione */
+.legend { display: flex; gap: 16px; font-size: 12px; color: #374151; margin: -6px 0 10px; }
+.legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+.dot.navy, .col.navy { background: var(--navy); }
+.dot.accent, .col.accent { background: var(--accent); }
+.week-chart { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 4px; height: 200px; align-items: end; }
+.week { display: flex; flex-direction: column; height: 100%; gap: 4px; }
+.week .cols { flex: 1; display: flex; align-items: flex-end; justify-content: center; gap: 2px; border-bottom: 1px solid var(--border); }
+.week .col { width: 40%; max-width: 14px; border-radius: 3px 3px 0 0; min-height: 1px; }
+.week .wk { font-size: 10px; overflow: hidden; white-space: nowrap; color: var(--muted); text-align: center; font-variant-numeric: tabular-nums; }
+.panels > *, .detail-grid > * { min-width: 0; }
+.facts dd { overflow-wrap: anywhere; }
+.inline-confirm { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; }
+.inline-confirm label { display: flex; gap: 4px; align-items: center; }
+
 @media (max-width: 900px) {
   .kpis { grid-template-columns: repeat(2, 1fr); }
   .panels, .detail-grid { grid-template-columns: 1fr; }
-  .office-nav { display: none; }
+  .office-top { flex-wrap: wrap; height: auto; padding: 10px 16px; gap: 8px 16px; }
+  .office-top .logo-sub { display: none; }
+  .office-nav { order: 3; width: 100%; margin-left: 0; overflow-x: auto; white-space: nowrap; }
+  .office-nav a { padding: 6px 10px; }
+  .office-user > span { display: none; }
   .office-main { padding: 16px; }
 }

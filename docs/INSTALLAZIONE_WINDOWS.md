@@ -196,6 +196,14 @@ risoluzione / respingimento con email automatica al cittadino, note interne e st
 3. L'operatore accede da `/accedi` con quelle credenziali e vede **solo** le segnalazioni del suo Comune
    (può cambiare la password con "Password dimenticata").
 
+**Amministrazione (solo per l'account amministratore)**
+Nel menu in alto, oltre al Cruscotto:
+- **Panoramica**: numeri di tutta la piattaforma, andamento settimanale, classifica dei Comuni,
+  segnalazioni sospette, cittadini più attivi, avvisi su PEC non consegnate e modalità collaudo.
+- **Cittadini**: ricerca, blocca/sblocca, elimina (a scelta anche segnalazioni e foto).
+- **Operatori**: crea gli account dei Comuni, blocca/sblocca, nuova password, elimina.
+- **Invii PEC**: tutti gli invii con l'errore restituito dal server di posta e il pulsante **Riprova**.
+
 **Dati dimostrativi (per presentazioni)**
 ```powershell
 docker compose exec app node prisma/demo.mjs            # crea ~26 segnalazioni finte a Messina

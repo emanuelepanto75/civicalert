@@ -23,7 +23,14 @@ export default async function OfficeLayout({ children }) {
         </Link>
         <nav className="office-nav">
           <Link href="/ufficio">Cruscotto</Link>
-          {user.role === 'ADMIN' && <Link href="/ufficio/operatori">Operatori</Link>}
+          {user.role === 'ADMIN' && (
+            <>
+              <Link href="/ufficio/amministrazione">Panoramica</Link>
+              <Link href="/ufficio/cittadini">Cittadini</Link>
+              <Link href="/ufficio/operatori">Operatori</Link>
+              <Link href="/ufficio/pec">Invii PEC</Link>
+            </>
+          )}
           <Link href="/">App cittadini</Link>
         </nav>
         <div className="office-user">
