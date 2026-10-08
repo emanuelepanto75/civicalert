@@ -62,12 +62,18 @@ export function parseFilters(params) {
     dal: get('dal'),
     al: get('al'),
     comune: get('comune'),
+    utente: get('utente'),
   };
 }
 
 // Un operatore vede solo il proprio Comune; l'amministratore tutti (o quello scelto).
 export function scopeWhere(user, filters = {}) {
-  if (user.role === 'ADMIN') return filters.comune ? { municipalityId: filters.comune } : {};
+  if (user.role === 'ADMIN') {
+    return {
+      ...(filters.comune && { municipalityId: filters.comune }),
+      ...(filters.utente && { userId: filters.utente }),
+    };
+  }
   return { municipalityId: user.municipalityId };
 }
 

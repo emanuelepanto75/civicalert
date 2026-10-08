@@ -200,7 +200,8 @@ risoluzione / respingimento con email automatica al cittadino, note interne e st
 Nel menu in alto, oltre al Cruscotto:
 - **Panoramica**: numeri di tutta la piattaforma, andamento settimanale, classifica dei Comuni,
   segnalazioni sospette, cittadini più attivi, avvisi su PEC non consegnate e modalità collaudo.
-- **Cittadini**: ricerca, blocca/sblocca, elimina (a scelta anche segnalazioni e foto).
+- **Cittadini**: ricerca, ordinamento per numero di segnalazioni (aperte/risolte, clic per vederle), blocca/sblocca, elimina (a scelta anche segnalazioni e foto).
+- **Comuni**: ricerca fra tutti i comuni, correzione dell'indirizzo PEC e attivazione/disattivazione dell'invio; gli invii non riusciti passano al nuovo indirizzo.
 - **Operatori**: crea gli account dei Comuni, blocca/sblocca, nuova password, elimina.
 - **Invii PEC**: tutti gli invii con l'errore restituito dal server di posta e il pulsante **Riprova**.
 

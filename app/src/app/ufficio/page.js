@@ -15,6 +15,9 @@ export default async function OfficeDashboard({ searchParams }) {
   const params = await searchParams;
   const filters = parseFilters(params);
 
+  const citizen = user.role === 'ADMIN' && filters.utente
+    ? await prisma.user.findUnique({ where: { id: filters.utente }, select: { firstName: true, lastName: true, email: true } })
+    : null;
   const [stats, reports, total, comuni] = await Promise.all([
     dashboardStats(user, filters),
     prisma.report.findMany({
@@ -50,6 +53,13 @@ export default async function OfficeDashboard({ searchParams }) {
           <div className="sub">Situazione aggiornata al {fmtDate(new Date())}</div>
         </div>
       </div>
+
+      {citizen && (
+        <div className="alert info">
+          Stai vedendo solo le segnalazioni di <strong>{citizen.firstName} {citizen.lastName}</strong> ({citizen.email}).{' '}
+          <Link href="/ufficio">Mostra tutte</Link>
+        </div>
+      )}
 
       <section className="kpis" aria-label="Indicatori">
         <Link href="/ufficio?stato=nuove" className="kpi accent">
@@ -109,6 +119,7 @@ export default async function OfficeDashboard({ searchParams }) {
 
       <section className="panel">
         <form className="filters" method="get">
+          {citizen && <input type="hidden" name="utente" value={filters.utente} />}
           <label>
             Stato
             <select name="stato" defaultValue={filters.stato}>

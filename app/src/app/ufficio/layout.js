@@ -27,6 +27,7 @@ export default async function OfficeLayout({ children }) {
             <>
               <Link href="/ufficio/amministrazione">Panoramica</Link>
               <Link href="/ufficio/cittadini">Cittadini</Link>
+              <Link href="/ufficio/comuni">Comuni</Link>
               <Link href="/ufficio/operatori">Operatori</Link>
               <Link href="/ufficio/pec">Invii PEC</Link>
             </>
