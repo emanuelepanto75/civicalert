@@ -9,11 +9,22 @@ let lastSiteUrl = ''; // per i link nelle PEC inviate dal worker periodico
 async function attempt(delivery, siteUrl) {
   const report = await prisma.report.findUnique({
     where: { id: delivery.reportId },
-    include: { user: true, category: true, municipality: true },
+    include: { user: true, category: true, municipality: true, duplicateOf: { select: { id: true, code: true, createdAt: true } } },
   });
   const attempts = delivery.attempts + 1;
   try {
-    const messageId = await sendReportPec({ report, recipient: delivery.recipient, siteUrl });
+    // Stesso problema già segnalato da altri: quante volte, compresa questa
+    const repeat = report.duplicateOf && {
+      firstCode: report.duplicateOf.code,
+      firstDate: report.duplicateOf.createdAt,
+      number: await prisma.report.count({
+        where: {
+          OR: [{ id: report.duplicateOf.id }, { duplicateOfId: report.duplicateOf.id }],
+          createdAt: { lte: report.createdAt },
+        },
+      }),
+    };
+    const messageId = await sendReportPec({ report, recipient: delivery.recipient, siteUrl, repeat });
     await prisma.$transaction([
       prisma.delivery.update({
         where: { id: delivery.id },
@@ -33,6 +44,11 @@ async function attempt(delivery, siteUrl) {
       },
     });
   }
+}
+
+// Indirizzo del sito visto nell'ultima richiesta: serve ai lavori in background.
+export function knownSiteUrl() {
+  return lastSiteUrl;
 }
 
 // Processa gli invii in attesa. Chiamata subito dopo una nuova segnalazione e,

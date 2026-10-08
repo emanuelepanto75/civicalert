@@ -18,6 +18,8 @@ export const config = {
   loginLockMinutes: int(process.env.LOGIN_LOCK_MINUTES, 15),
   maxReportsPerDay: int(process.env.MAX_REPORTS_PER_DAY, 5),
   duplicateRadiusM: int(process.env.DUPLICATE_RADIUS_M, 50),
+  // Giorni dopo cui si chiede al cittadino se il problema è stato risolto (Comuni senza cruscotto)
+  reminderDays: int(process.env.REMINDER_DAYS, 15),
   maxGpsAccuracyM: int(process.env.MAX_GPS_ACCURACY_M, 200),
   maxUploadMb: int(process.env.MAX_UPLOAD_MB, 50),
   maxImageSidePx: int(process.env.MAX_IMAGE_SIDE_PX, 2048),

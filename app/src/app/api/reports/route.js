@@ -7,7 +7,8 @@ import { requireUser } from '@/lib/guards';
 import { baseUrl, jsonError, zodMessage } from '@/lib/http';
 import { MediaError, deleteMedia, saveMedia } from '@/lib/media';
 import { reportSchema } from '@/lib/reportInput';
-import { authenticityFlags, findDuplicate, newReportCode, publicReport, reportsLeftToday } from '@/lib/reports';
+import { sendReceiptEmail } from '@/lib/emails';
+import { authenticityFlags, findSameProblem, newReportCode, publicReport, reportsLeftToday } from '@/lib/reports';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,7 +16,8 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   const since = new Date(Date.now() - 365 * 24 * 3600 * 1000);
   const reports = await prisma.report.findMany({
-    where: { createdAt: { gte: since }, status: { not: 'REJECTED' } },
+    // Lo stesso problema segnalato da più cittadini compare una volta sola
+    where: { createdAt: { gte: since }, status: { not: 'REJECTED' }, duplicateOfId: null },
     orderBy: { createdAt: 'desc' },
     take: 1000,
     include: { category: true, municipality: true },
@@ -55,15 +57,11 @@ export async function POST(request) {
   const category = await prisma.category.findFirst({ where: { id: input.categoryId, isActive: true } });
   if (!category) return jsonError('Categoria non valida');
 
-  const duplicate = await findDuplicate(input);
-  if (duplicate) {
-    return jsonError(
-      duplicate.userId === user.id
-        ? `Hai già segnalato questo problema (${duplicate.code}).`
-        : `Questo problema è già stato segnalato a ${Math.round(duplicate.distance)} m da qui (${duplicate.code}).`,
-      409,
-      { duplicate: duplicate.code },
-    );
+  // Lo stesso problema segnalato da altri cittadini parte comunque (il Comune
+  // vede che non è un caso isolato); lo stesso utente non può ripeterlo.
+  const sameProblem = await findSameProblem({ ...input, userId: user.id });
+  if (sameProblem?.mine) {
+    return jsonError(`Hai già segnalato questo problema (${sameProblem.mine.code}).`, 409, { duplicate: sameProblem.mine.code });
   }
 
   let media;
@@ -101,6 +99,7 @@ export async function POST(request) {
         photoTakenAt: media.exif.takenAt ?? null,
         photoGpsDistM,
         authenticity: flags,
+        duplicateOfId: sameProblem?.first?.id ?? null,
         deliveries: pecTo ? { create: { channel: 'PEC', recipient: pecTo } } : undefined,
       },
     });
@@ -116,8 +115,15 @@ export async function POST(request) {
 
     const saved = await prisma.report.findUnique({
       where: { id: report.id },
-      include: { category: true, municipality: true, deliveries: true },
+      include: { category: true, municipality: true, deliveries: true, user: true },
     });
+    const pecStatus = saved.deliveries[0]?.status === 'SENT' ? 'SENT' : pecTo ? 'PENDING' : null;
+    sendReceiptEmail({
+      report: saved,
+      pec: pecStatus,
+      sameProblem: (sameProblem?.count ?? 0) + 1,
+      siteUrl: baseUrl(request),
+    }).catch((e) => console.error('[ricevuta]', e.message));
     return NextResponse.json(
       { report: publicReport(saved, { includeOwner: true, viewerId: user.id }), routed: Boolean(pecTo) },
       { status: 201 },

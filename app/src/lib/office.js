@@ -92,18 +92,21 @@ export function buildWhere(user, filters) {
 export async function findScopedReport(user, code) {
   const report = await prisma.report.findUnique({
     where: { code },
-    include: { category: true, municipality: true, user: true, deliveries: true },
+    include: {
+      category: true,
+      municipality: true,
+      user: true,
+      deliveries: true,
+      duplicateOf: { select: { code: true, createdAt: true } },
+      duplicates: { select: { code: true, createdAt: true, status: true }, orderBy: { createdAt: 'asc' } },
+    },
   });
   if (!report) return null;
   if (user.role !== 'ADMIN' && report.municipalityId !== user.municipalityId) return null;
   return report;
 }
 
-/**
- * Cambia lo stato di una segnalazione, registra l'evento nello storico e,
- * se richiesto, avvisa il cittadino via email.
- */
-export async function changeStatus({ report, actor, toStatus, note, notify, siteUrl }) {
+async function applyStatus({ report, actor, toStatus, note, notify, siteUrl }) {
   const resolved = toStatus === 'RESOLVED';
   await prisma.$transaction([
     prisma.report.update({
@@ -130,6 +133,24 @@ export async function changeStatus({ report, actor, toStatus, note, notify, site
     await sendStatusEmail({ report, toStatus, note, siteUrl }).catch((err) =>
       console.error('[ufficio] email al cittadino non inviata:', err.message),
     );
+  }
+}
+
+/**
+ * Cambia lo stato di una segnalazione, registra l'evento nello storico e,
+ * se richiesto, avvisa il cittadino via email. Se altri cittadini hanno
+ * segnalato lo stesso problema, le loro segnalazioni ancora aperte seguono la
+ * prima e anche loro vengono avvisati.
+ */
+export async function changeStatus({ report, actor, toStatus, note, notify, siteUrl }) {
+  await applyStatus({ report, actor, toStatus, note, notify, siteUrl });
+  if (report.duplicateOfId) return;
+  const others = await prisma.report.findMany({
+    where: { duplicateOfId: report.id, status: { in: ['PENDING', 'SENT', 'ACKNOWLEDGED'], not: toStatus } },
+    include: { user: true, category: true },
+  });
+  for (const other of others) {
+    await applyStatus({ report: other, actor, toStatus, note, notify, siteUrl });
   }
 }
 

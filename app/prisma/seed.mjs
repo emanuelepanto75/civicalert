@@ -10,11 +10,14 @@ import { nameKey } from '../src/lib/normalize.mjs';
 const prisma = new PrismaClient();
 const DATA_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), 'data');
 
+// Categorie non più proposte: restano nel database per le segnalazioni già fatte.
+const RETIRED_CATEGORIES = ['incidente'];
+
 const CATEGORIES = [
   { slug: 'buca', name: 'Buca / Dissesto stradale', icon: '🕳️', color: '#ea580c' },
   { slug: 'ingombrante', name: 'Oggetto ingombrante', icon: '🗑️', color: '#2563eb' },
   { slug: 'illuminazione', name: 'Illuminazione guasta', icon: '💡', color: '#ca8a04' },
-  { slug: 'incidente', name: 'Incidente stradale', icon: '⚠️', color: '#dc2626' },
+  { slug: 'segnaletica', name: 'Segnaletica mancante o danneggiata', icon: '⚠️', color: '#dc2626' },
   { slug: 'marciapiede', name: 'Marciapiede dissestato', icon: '🧱', color: '#7c3aed' },
   { slug: 'altro', name: 'Altro problema', icon: '➕', color: '#4b5563' },
 ];
@@ -35,10 +38,11 @@ async function seedCategories() {
   for (const [i, c] of CATEGORIES.entries()) {
     await prisma.category.upsert({
       where: { slug: c.slug },
-      update: {},
+      update: { sortOrder: i, isActive: true },
       create: { ...c, isPredefined: true, sortOrder: i },
     });
   }
+  await prisma.category.updateMany({ where: { slug: { in: RETIRED_CATEGORIES } }, data: { isActive: false } });
 }
 
 async function seedMunicipalities() {

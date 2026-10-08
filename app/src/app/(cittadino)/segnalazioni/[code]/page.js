@@ -17,6 +17,8 @@ export default async function ReportDetailPage({ params }) {
       category: true,
       municipality: true,
       deliveries: true,
+      duplicateOf: { select: { code: true } },
+      _count: { select: { duplicates: true } },
       events: { where: { kind: 'STATUS', visibleToCitizen: true }, orderBy: { createdAt: 'asc' } },
     },
   });
@@ -48,6 +50,15 @@ export default async function ReportDetailPage({ params }) {
             </span>
           </div>
           {r.municipality && <div className="kv"><span className="k">Comune</span><span className="v">{r.municipality}</span></div>}
+          {raw._count.duplicates > 0 && (
+            <div className="kv"><span className="k">Segnalata da</span><span className="v">{raw._count.duplicates + 1} cittadini</span></div>
+          )}
+          {raw.duplicateOf && (
+            <div className="kv">
+              <span className="k">Stesso problema</span>
+              <span className="v">già segnalato con <a href={`/segnalazioni/${raw.duplicateOf.code}`}>{raw.duplicateOf.code}</a></span>
+            </div>
+          )}
           {r.description && <div className="kv"><span className="k">Descrizione</span><span className="v">{r.description}</span></div>}
           {r.resolvedAt && (
             <div className="kv">

@@ -7,6 +7,7 @@ export default function BottomNav({ loggedIn }) {
   const pathname = usePathname();
   const items = [
     { href: '/', icon: '🗺️', label: 'Mappa' },
+    { href: '/segnalazioni', icon: '🏛️', label: 'Comuni' },
     { href: '/segnala', icon: '📍', label: 'Segnala' },
     { href: '/le-mie', icon: '📋', label: 'Le mie' },
     loggedIn ? { href: '/profilo', icon: '👤', label: 'Profilo' } : { href: '/accedi', icon: '🔑', label: 'Accedi' },

@@ -66,6 +66,31 @@ export default async function OfficeReportPage({ params }) {
                 {report.gpsAccuracyM != null && <span className="muted"> · precisione ±{Math.round(report.gpsAccuracyM)} m</span>}
               </dd>
               <dt>Comune</dt><dd>{report.municipality?.name || 'non identificato'}</dd>
+              {report.duplicateOf && (
+                <>
+                  <dt>Stesso problema</dt>
+                  <dd>
+                    già segnalato con{' '}
+                    <Link href={`/ufficio/segnalazioni/${report.duplicateOf.code}`} className="code">{report.duplicateOf.code}</Link>{' '}
+                    il {fmt(report.duplicateOf.createdAt)}
+                  </dd>
+                </>
+              )}
+              {report.duplicates.length > 0 && (
+                <>
+                  <dt>Segnalato anche da</dt>
+                  <dd>
+                    {report.duplicates.length} altr{report.duplicates.length === 1 ? 'o cittadino' : 'i cittadini'}:{' '}
+                    {report.duplicates.map((d, i) => (
+                      <span key={d.code}>
+                        {i > 0 && ', '}
+                        <Link href={`/ufficio/segnalazioni/${d.code}`} className="code">{d.code}</Link>
+                      </span>
+                    ))}
+                    <div className="muted">Cambiando lo stato qui si aggiornano anche queste e i cittadini vengono avvisati.</div>
+                  </dd>
+                </>
+              )}
               <dt>Segnalante</dt>
               <dd>
                 {report.user ? (

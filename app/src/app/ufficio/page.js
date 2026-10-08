@@ -21,7 +21,7 @@ export default async function OfficeDashboard({ searchParams }) {
       where: buildWhere(user, filters),
       orderBy: { createdAt: 'desc' },
       take: LIST_LIMIT,
-      include: { category: true, municipality: true },
+      include: { category: true, municipality: true, duplicateOf: { select: { code: true } }, _count: { select: { duplicates: true } } },
     }),
     prisma.report.count({ where: buildWhere(user, filters) }),
     user.role === 'ADMIN' ? adminMunicipalities() : [],
@@ -191,6 +191,8 @@ export default async function OfficeDashboard({ searchParams }) {
                     <td>{r.category.icon} {r.category.name}</td>
                     <td>
                       {r.address || '—'}
+                      {r._count.duplicates > 0 && <div className="muted">👥 Segnalata da {r._count.duplicates + 1} cittadini</div>}
+                      {r.duplicateOf && <div className="muted">↪ Stesso problema di {r.duplicateOf.code}</div>}
                       {r.authenticity.length > 0 && <div className="muted">⚠️ Da verificare</div>}
                     </td>
                     {user.role === 'ADMIN' && <td>{r.municipality?.name || '—'}</td>}

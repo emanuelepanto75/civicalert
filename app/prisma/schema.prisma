@@ -108,6 +108,12 @@ model Report {
   authenticity    String[]      @default([]) // avvisi, es. "FOTO_VECCHIA"
   resolvedAt      DateTime?     @map("resolved_at")
   resolvedBy      ResolvedBy?   @map("resolved_by")
+  // Stesso problema già segnalato da altri cittadini: punta alla prima segnalazione
+  duplicateOfId   String?       @map("duplicate_of_id")
+  duplicateOf     Report?       @relation("Duplicates", fields: [duplicateOfId], references: [id], onDelete: SetNull)
+  duplicates      Report[]      @relation("Duplicates")
+  // Promemoria al cittadino ("il problema è stato risolto?") già inviato
+  reminderSentAt  DateTime?     @map("reminder_sent_at")
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
 
@@ -117,6 +123,7 @@ model Report {
   @@index([categoryId, status])
   @@index([municipalityId, status])
   @@index([userId, createdAt])
+  @@index([duplicateOfId])
   @@map("reports")
 }
 

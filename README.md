@@ -16,9 +16,10 @@ automaticamente fra i 7.904 comuni italiani.
 | 📍 Segnalazione | Foto/video dalla fotocamera o galleria, GPS automatico non modificabile, categoria, descrizione, riepilogo prima dell'invio |
 | 🏛 Instradamento | Indirizzo e Comune ricavati dalle coordinate (OpenStreetMap), PEC del Comune dall'Indice PA |
 | 📨 PEC | Email con scheda e foto allegata; 3 tentativi automatici in caso di errore; registro degli invii |
-| 🛡 Controlli | Duplicati (stessa categoria entro 50 m ancora aperta), limite giornaliero anti-spam, avvisi di autenticità (foto vecchia o scattata altrove, GPS impreciso) |
+| 🛡 Controlli | Stesso problema segnalato da più cittadini (stessa categoria entro 50 m): la segnalazione parte comunque, collegata alla prima, e la PEC indica quante sono; lo stesso utente non può ripeterla. Limite giornaliero anti-spam, avvisi di autenticità (foto vecchia o scattata altrove, GPS impreciso) |
+| 📧 Email al cittadino | Ricevuta dopo l'invio; avviso a ogni cambio di stato (anche per chi ha segnalato lo stesso problema); per i Comuni senza cruscotto, dopo 15 giorni promemoria "il problema è stato risolto?" |
 | ✅ Chiusura | Il cittadino può segnare la segnalazione come risolta |
-| 🗺 Mappa pubblica | Tutte le segnalazioni, senza dati personali dei segnalanti |
+| 🗺 Mappa ed elenco pubblici | Mappa e elenco per Comune (`/segnalazioni`) con data e stato, senza dati personali dei segnalanti |
 | 🏛 Cruscotto ufficio (`/ufficio`) | Per gli operatori comunali: indicatori, grafico per categoria, mappa, filtri, esportazione CSV, presa in carico / risoluzione / respingimento con email al cittadino, note interne e storico. L'amministratore crea gli operatori e li assegna al Comune |
 | 📱 PWA | Installabile sulla schermata Home di iPhone e Android |
 

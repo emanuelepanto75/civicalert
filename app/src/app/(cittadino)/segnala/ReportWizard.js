@@ -242,10 +242,17 @@ function ReviewStep({ file, preview, category, description, geo, onBack, onDone 
       )}
       {check?.duplicate && (
         <div className="alert warn">
-          {check.duplicate.mine
-            ? 'Hai già segnalato questo problema: '
-            : `Questo problema è già stato segnalato a ${check.duplicate.distance} m da qui: `}
+          Hai già segnalato questo problema:{' '}
           <Link href={`/segnalazioni/${check.duplicate.code}`}>{check.duplicate.code}</Link>. Non serve inviarlo di nuovo.
+        </div>
+      )}
+      {check?.sameProblem && (
+        <div className="alert info">
+          Questo problema risulta già segnalato{' '}
+          {check.sameProblem.count === 1 ? 'da un altro cittadino' : `da ${check.sameProblem.count} cittadini`} dal{' '}
+          {new Date(check.sameProblem.since).toLocaleDateString('it-IT', { timeZone: 'Europe/Rome' })} (
+          <Link href={`/segnalazioni/${check.sameProblem.code}`}>{check.sameProblem.code}</Link>). Inviala comunque: il Comune
+          riceverà anche la tua e saprà che non è un caso isolato.
         </div>
       )}
       {check && check.reportsLeft <= 0 && (

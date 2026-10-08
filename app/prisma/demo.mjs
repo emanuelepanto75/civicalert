@@ -31,7 +31,7 @@ const DESCRIPTIONS = {
   buca: ['Buca profonda vicino alle strisce pedonali', 'Avvallamento pericoloso per i motocicli', 'Asfalto sgretolato dopo la pioggia', null],
   ingombrante: ['Materasso abbandonato accanto ai cassonetti', 'Mobili lasciati sul marciapiede', null],
   illuminazione: ['Lampione spento da diversi giorni', 'Tre lampioni consecutivi non funzionanti', null],
-  incidente: ['Segnale stradale abbattuto', 'Detriti in carreggiata dopo un incidente'],
+  segnaletica: ['Segnale di stop abbattuto', 'Strisce pedonali non più visibili', 'Cartello di senso unico girato'],
   marciapiede: ['Mattonelle sollevate, rischio di inciampo', 'Marciapiede dissestato davanti alla scuola', null],
   altro: ['Tombino senza coperchio', 'Ramo pericolante sopra la strada'],
 };
@@ -42,10 +42,10 @@ const PLAN = [
   ['buca', 'ACKNOWLEDGED', 5], ['illuminazione', 'ACKNOWLEDGED', 6], ['buca', 'ACKNOWLEDGED', 9],
   ['marciapiede', 'ACKNOWLEDGED', 11], ['ingombrante', 'ACKNOWLEDGED', 3],
   ['buca', 'RESOLVED', 8, 3], ['ingombrante', 'RESOLVED', 6, 1], ['illuminazione', 'RESOLVED', 14, 4],
-  ['buca', 'RESOLVED', 20, 9], ['ingombrante', 'RESOLVED', 12, 2], ['incidente', 'RESOLVED', 9, 1],
+  ['buca', 'RESOLVED', 20, 9], ['ingombrante', 'RESOLVED', 12, 2], ['segnaletica', 'RESOLVED', 9, 1],
   ['marciapiede', 'RESOLVED', 30, 12], ['illuminazione', 'RESOLVED', 25, 5], ['buca', 'RESOLVED', 40, 14],
   ['ingombrante', 'RESOLVED', 18, 2], ['buca', 'RESOLVED', 45, 7], ['altro', 'RESOLVED', 16, 3],
-  ['incidente', 'REJECTED', 10], ['altro', 'REJECTED', 22],
+  ['segnaletica', 'REJECTED', 10], ['altro', 'REJECTED', 22],
 ];
 
 const rand = (() => {
