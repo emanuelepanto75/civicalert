@@ -222,6 +222,38 @@ Gli amministratori non vengono mai eliminati da questo comando.
 
 ---
 
+## Ripartenza automatica dopo un blackout
+
+Perché l'app riparta da sola quando torna la corrente servono quattro cose, una sola volta.
+
+**1. Il PC si riaccende da solo.** Riavvia il PC ed entra nel BIOS (tasto `Canc`, `F2` o `F10` all'accensione, dipende dal modello).
+Cerca *Restore on AC Power Loss*, *AC Back* o *After Power Failure* (di solito in *Power* o *Advanced*) e impostalo su **Power On**. Salva ed esci.
+
+**2. Windows entra da solo con il tuo utente.** Il modo più semplice è il programma gratuito di Microsoft **Autologon**
+(<https://learn.microsoft.com/sysinternals/downloads/autologon>): avvialo, inserisci la password del tuo utente e premi *Enable*.
+In *Impostazioni › Sistema › Alimentazione* imposta sospensione e spegnimento dello schermo su **Mai** (lo schermo può spegnersi, il PC no).
+
+**3. Docker Desktop parte all'accesso.** In Docker Desktop › *Settings › General* deve essere attivo *Start Docker Desktop when you sign in*.
+
+**4. Un'attività avvia l'app quando Docker è pronto.** In **PowerShell come amministratore**:
+```powershell
+$azione = New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-ExecutionPolicy Bypass -WindowStyle Hidden -File C:\civicalert\scripts\avvio.ps1 -Blocca'
+$quando = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
+$quando.Delay = 'PT1M'
+Register-ScheduledTask -TaskName 'Avvio CivicAlerts' -Action $azione -Trigger $quando -RunLevel Highest
+```
+Lo script aspetta fino a 10 minuti che Docker sia pronto, avvia i servizi e **blocca lo schermo** (con l'accesso automatico
+chiunque accenda il PC entrerebbe nel tuo utente). Annota tutto in `C:\civicalert\backup\avvio.log`.
+
+**Prova:** riavvia il PC senza toccare nulla, aspetta 5 minuti e apri `https://localhost/ufficio` da un altro dispositivo
+(o dal server, dopo aver sbloccato). Se non va, guarda `backup\avvio.log`.
+
+> Dopo un blackout anche il router si riavvia e **l'indirizzo internet di casa di solito cambia**: per `civicalerts.it`
+> va aggiornato il DNS su Aruba (vedi `docs/SERVER_CASA_INTERNET.md`). Un gruppo di continuità (UPS) da 60–80 € per server
+> e router evita la maggior parte dei casi.
+
+---
+
 ## Comandi utili
 
 | Cosa | Comando (da `C:\civicalert`) |

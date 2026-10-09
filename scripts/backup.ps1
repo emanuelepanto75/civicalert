@@ -1,4 +1,4 @@
-# Backup di CivicAlerts: database + foto/video, in .\backup\AAAA-MM-GG_HHmm
+﻿# Backup di CivicAlerts: database + foto/video, in .\backup\AAAA-MM-GG_HHmm
 # Uso (PowerShell, dalla cartella del progetto):   .\scripts\backup.ps1
 # I backup più vecchi di $Giorni giorni vengono eliminati.
 param([int]$Giorni = 30)
