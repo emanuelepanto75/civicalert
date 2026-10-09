@@ -17,13 +17,20 @@ export default function ReportWizard({ categories }) {
   const geo = useGeolocation();
 
   useEffect(() => {
-    if (!file) return setPreview(null);
+    if (!file) {
+      setPreview(null);
+      return;
+    }
     const url = URL.createObjectURL(file);
     setPreview(url);
     return () => URL.revokeObjectURL(url);
   }, [file]);
 
-  useEffect(() => window.scrollTo(0, 0), [step]);
+  // Graffe obbligatorie: in Chrome recenti scrollTo restituisce una Promise, che
+  // React scambierebbe per la funzione di pulizia dell'effetto (errore "u is not a function").
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [step]);
 
   if (result) return <Success result={result} />;
 
