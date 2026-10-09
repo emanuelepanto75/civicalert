@@ -1,0 +1,195 @@
+// Schema database CivicAlert
+// Dopo una modifica: npx prisma migrate dev --name <descrizione>
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Utenti ───────────────────────────────────────────────────────────────────
+model User {
+  id                String    @id @default(uuid())
+  email             String    @unique
+  phone             String
+  passwordHash      String    @map("password_hash")
+  firstName         String    @map("first_name")
+  lastName          String    @map("last_name")
+  role              Role      @default(CITIZEN)
+  municipalityId    String?   @map("municipality_id") // per gli operatori comunali
+  municipality      Municipality? @relation(fields: [municipalityId], references: [id])
+  privacyAcceptedAt DateTime  @map("privacy_accepted_at")
+  emailVerifiedAt   DateTime? @map("email_verified_at")
+  verifyToken       String?   @unique @map("verify_token")
+  resetToken        String?   @unique @map("reset_token")
+  resetTokenExp     DateTime? @map("reset_token_exp")
+  failedLogins      Int       @default(0) @map("failed_logins")
+  lockedUntil       DateTime? @map("locked_until")
+  isBanned          Boolean   @default(false) @map("is_banned")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  lastLoginAt       DateTime? @map("last_login_at")
+
+  reports Report[]
+  events  ReportEvent[]
+
+  @@map("users")
+}
+
+enum Role {
+  CITIZEN
+  OPERATOR
+  ADMIN
+}
+
+// ── Comuni ───────────────────────────────────────────────────────────────────
+model Municipality {
+  id             String   @id @default(uuid())
+  name           String
+  province       String
+  provinceCode   String   @map("province_code") // sigla, es. ME
+  region         String
+  istatCode      String   @unique @map("istat_code")
+  nameKey        String   @map("name_key") // nome normalizzato per il matching
+  pecAddress     String?  @map("pec_address")
+  notifyPec      Boolean  @default(true) @map("notify_pec")
+  isActive       Boolean  @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  reports   Report[]
+  operators User[]
+
+  @@index([nameKey])
+  @@map("municipalities")
+}
+
+// ── Categorie ────────────────────────────────────────────────────────────────
+model Category {
+  id           String   @id @default(uuid())
+  slug         String   @unique
+  name         String
+  icon         String // emoji
+  color        String // colore del pin sulla mappa
+  isPredefined Boolean  @default(false) @map("is_predefined")
+  isActive     Boolean  @default(true) @map("is_active")
+  sortOrder    Int      @default(0) @map("sort_order")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  reports Report[]
+
+  @@map("categories")
+}
+
+// ── Segnalazioni ─────────────────────────────────────────────────────────────
+model Report {
+  id              String        @id @default(uuid())
+  code            String        @unique // codice leggibile, es. CA-7K2M9Q
+  userId          String?       @map("user_id") // null se l'account è stato eliminato
+  user            User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  categoryId      String        @map("category_id")
+  category        Category      @relation(fields: [categoryId], references: [id])
+  description     String?
+  mediaPath       String?       @map("media_path") // percorso relativo in UPLOAD_DIR
+  mediaType       MediaType?    @map("media_type")
+  latitude        Float
+  longitude       Float
+  gpsAccuracyM    Float?        @map("gps_accuracy_m")
+  address         String?
+  municipalityId  String?       @map("municipality_id")
+  municipality    Municipality? @relation(fields: [municipalityId], references: [id])
+  status          ReportStatus  @default(PENDING)
+  // Controllo autenticità: dati EXIF della foto confrontati con il GPS del telefono
+  photoTakenAt    DateTime?     @map("photo_taken_at")
+  photoGpsDistM   Float?        @map("photo_gps_dist_m")
+  authenticity    String[]      @default([]) // avvisi, es. "FOTO_VECCHIA"
+  resolvedAt      DateTime?     @map("resolved_at")
+  resolvedBy      ResolvedBy?   @map("resolved_by")
+  // Stesso problema già segnalato da altri cittadini: punta alla prima segnalazione
+  duplicateOfId   String?       @map("duplicate_of_id")
+  duplicateOf     Report?       @relation("Duplicates", fields: [duplicateOfId], references: [id], onDelete: SetNull)
+  duplicates      Report[]      @relation("Duplicates")
+  // Promemoria al cittadino ("il problema è stato risolto?") già inviato
+  reminderSentAt  DateTime?     @map("reminder_sent_at")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  deliveries Delivery[]
+  events     ReportEvent[]
+
+  @@index([categoryId, status])
+  @@index([municipalityId, status])
+  @@index([userId, createdAt])
+  @@index([duplicateOfId])
+  @@map("reports")
+}
+
+enum MediaType {
+  PHOTO
+  VIDEO
+}
+
+enum ReportStatus {
+  PENDING      // salvata, invio non ancora riuscito / comune non configurato
+  SENT         // PEC inviata al comune
+  ACKNOWLEDGED // presa in carico
+  RESOLVED     // risolta
+  REJECTED     // respinta
+}
+
+enum ResolvedBy {
+  CITIZEN
+  MUNICIPALITY
+}
+
+// ── Log invii (PEC, in futuro WhatsApp) ──────────────────────────────────────
+model Delivery {
+  id            String         @id @default(uuid())
+  reportId      String         @map("report_id")
+  report        Report         @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  channel       String // "PEC"
+  recipient     String
+  status        DeliveryStatus @default(PENDING)
+  attempts      Int            @default(0)
+  nextAttemptAt DateTime       @default(now()) @map("next_attempt_at")
+  messageId     String?        @map("message_id")
+  lastError     String?        @map("last_error")
+  sentAt        DateTime?      @map("sent_at")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  @@index([status, nextAttemptAt])
+  @@map("deliveries")
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  FAILED // tentativi esauriti
+}
+
+// ── Storico della segnalazione (cambi di stato, note dell'ufficio) ───────────
+model ReportEvent {
+  id                String        @id @default(uuid())
+  reportId          String        @map("report_id")
+  report            Report        @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  actorId           String?       @map("actor_id")
+  actor             User?         @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  kind              EventKind
+  fromStatus        ReportStatus? @map("from_status")
+  toStatus          ReportStatus? @map("to_status")
+  note              String?
+  visibleToCitizen  Boolean       @default(false) @map("visible_to_citizen")
+  createdAt         DateTime      @default(now()) @map("created_at")
+
+  @@index([reportId, createdAt])
+  @@map("report_events")
+}
+
+enum EventKind {
+  STATUS // cambio di stato
+  NOTE   // nota interna dell'ufficio
+}

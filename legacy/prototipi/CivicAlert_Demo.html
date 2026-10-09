@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CivicAlert – Demo Interattiva</title>
+<style>
+  :root {
+    --navy: #1A3A6B;
+    --navy-dark: #122a52;
+    --accent: #E85D04;
+    --accent-light: #fff3eb;
+    --green: #16a34a;
+    --green-bg: #f0fdf4;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --card: #ffffff;
+    --bg: #f8f9fb;
+    --lite: #EEF4FB;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, Helvetica, sans-serif; background: var(--bg); color: #111827; }
+
+  /* ── SHELL ── */
+  .shell {
+    max-width: 420px;
+    margin: 24px auto;
+    background: #1a1a2e;
+    border-radius: 36px;
+    padding: 12px;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.4);
+  }
+  .phone {
+    background: var(--bg);
+    border-radius: 26px;
+    overflow: hidden;
+    min-height: 780px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── NAVBAR ── */
+  .navbar {
+    background: var(--navy);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .logo { display: flex; align-items: center; gap: 8px; }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .logo-text { color: white; font-weight: 700; font-size: 16px; }
+  .logo-text span { color: var(--accent); }
+  .step-badge {
+    background: rgba(255,255,255,0.15);
+    color: #93c5fd;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+  .progress-bar {
+    height: 3px;
+    background: rgba(255,255,255,0.15);
+    flex-shrink: 0;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.5s ease;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; flex: 1; flex-direction: column; }
+  .screen.active { display: flex; }
+  .scroll-area { flex: 1; overflow-y: auto; padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* ── BUTTONS ── */
+  .btn-primary {
+    background: var(--navy);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    width: 100%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: opacity 0.2s;
+  }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-primary.accent { background: var(--accent); }
+  .btn-primary.green  { background: var(--green); }
+  .btn-secondary {
+    background: white;
+    color: #111827;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    width: 100%;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: background 0.2s;
+  }
+  .btn-secondary:hover { background: #f9fafb; }
+  .btn-row { display: flex; gap: 10px; }
+  .btn-row .btn-secondary { flex: 1; }
+  .btn-row .btn-primary   { flex: 2; }
+
+  /* ── CARDS ── */
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .card-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+  /* ── CATEGORY GRID ── */
+  .cat-grid { display: flex; flex-direction: column; gap: 10px; }
+  .cat-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    cursor: pointer;
+    background: white;
+    transition: all 0.15s;
+  }
+  .cat-item:hover { border-color: #93c5fd; background: #f0f7ff; }
+  .cat-item.selected { border-color: var(--navy); background: var(--lite); }
+  .cat-icon { font-size: 24px; flex-shrink: 0; }
+  .cat-name { font-weight: 700; font-size: 14px; color: #111827; }
+  .cat-check {
+    margin-left: auto;
+    width: 24px; height: 24px;
+    background: var(--navy);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    font-size: 13px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .cat-item.selected .cat-check { opacity: 1; }
+
+  /* ── UPLOAD ZONE ── */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+  }
+  .upload-zone:hover { border-color: var(--navy); background: var(--lite); }
+  .upload-icon { font-size: 40px; margin-bottom: 8px; }
+  .upload-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+  .upload-sub { color: var(--muted); font-size: 12px; }
+  .media-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .media-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 14px 8px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 600;
+    color: #374151;
+    transition: all 0.15s;
+  }
+  .media-btn:hover { border-color: #93c5fd; background: #f0f7ff; }
+  .media-btn span { font-size: 22px; }
+
+  /* ── PREVIEW FOTO ── */
+  .foto-preview {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 2px solid var(--navy);
+    display: none;
+  }
+  .foto-preview img { width: 100%; height: 200px; object-fit: cover; display: block; }
+  .foto-overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(0,0,0,0.5);
+    padding: 8px 12px;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .foto-delete {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 32px; height: 32px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ── GPS BOX ── */
+  .gps-box {
+    border-radius: 14px;
+    padding: 14px;
+    display: flex; flex-direction: column; gap: 6px;
+    border: 1px solid var(--border);
+    background: white;
+  }
+  .gps-box.loading { background: #f9fafb; }
+  .gps-box.ok      { background: var(--green-bg); border-color: #bbf7d0; }
+  .gps-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+  .gps-status { font-size: 13px; font-weight: 700; }
+  .gps-status.ok    { color: var(--green); }
+  .gps-status.loading { color: var(--navy); }
+  .gps-addr  { font-size: 12px; color: #374151; }
+  .gps-coords { font-size: 11px; color: var(--muted); }
+
+  /* ── PEC BOX ── */
+  .pec-box {
+    background: var(--green-bg);
+    border: 1px solid #bbf7d0;
+    border-radius: 14px;
+    padding: 14px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .pec-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #16a34a; }
+  .pec-comune { font-size: 13px; font-weight: 700; color: #166534; }
+  .pec-addr   { font-size: 11px; color: #166534; word-break: break-all; }
+
+  /* ── RIEPILOGO ── */
+  .recap-photo { width: 100%; height: 180px; object-fit: cover; display: block; }
+  .recap-row { display: flex; align-items: flex-start; gap: 10px; }
+  .recap-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .recap-label { font-size: 11px; color: var(--muted); }
+  .recap-value { font-size: 14px; font-weight: 700; color: #111827; }
+  .divider { height: 1px; background: var(--border); }
+
+  /* ── SUCCESSO ── */
+  .success-icon {
+    width: 80px; height: 80px;
+    background: var(--green-bg);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px;
+    margin: 0 auto;
+  }
+  .id-box {
+    background: var(--lite);
+    border: 1px solid #bfdbfe;
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+  }
+  .id-label { font-size: 11px; color: var(--navy); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+  .id-value { font-size: 26px; font-weight: 700; color: var(--navy); font-family: monospace; margin: 4px 0; }
+  .id-sub   { font-size: 11px; color: var(--muted); }
+  .pec-confirm {
+    background: var(--green-bg);
+    border: 1px solid #bbf7d0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: #166534;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .steps-after { display: flex; flex-direction: column; gap: 8px; }
+  .step-row { display: flex; align-items: flex-start; gap: 10px; }
+  .step-num {
+    width: 24px; height: 24px;
+    background: var(--navy);
+    color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .step-text { font-size: 13px; color: #374151; line-height: 1.5; }
+
+  /* ── TEXTAREA ── */
+  textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 13px;
+    font-family: Arial;
+    resize: none;
+    outline: none;
+    color: #111827;
+    background: white;
+    transition: border-color 0.2s;
+  }
+  textarea:focus { border-color: var(--navy); }
+
+  /* ── SPINNER ── */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+  .spinner.dark { border-color: rgba(26,58,107,0.2); border-top-color: var(--navy); }
+
+  /* ── MAPPA SCREEN ── */
+  .mappa-mock {
+    flex: 1;
+    background: linear-gradient(135deg, #e8f0e8 0%, #d4e8d4 50%, #c8dcc8 100%);
+    position: relative;
+    overflow: hidden;
+    min-height: 400px;
+  }
+  .mappa-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .strada-h {
+    position: absolute;
+    background: rgba(255,255,255,0.7);
+    height: 12px;
+    left: 0; right: 0;
+  }
+  .strada-v {
+    position: absolute;
+    background: rgba(255,255,255,0.7);
+    width: 12px;
+    top: 0; bottom: 0;
+  }
+  .pin {
+    position: absolute;
+    cursor: pointer;
+    transform: translate(-50%, -100%);
+    transition: transform 0.2s;
+  }
+  .pin:hover { transform: translate(-50%, -100%) scale(1.2); }
+  .pin-dot {
+    width: 28px; height: 28px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .pin-pulse {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    background: rgba(232,93,4,0.2);
+    animation: pulse 2s ease-out infinite;
+  }
+  @keyframes pulse { 0% { transform: translate(-50%,-50%) scale(0.5); opacity: 1; } 100% { transform: translate(-50%,-50%) scale(2); opacity: 0; } }
+  .mappa-overlay {
+    position: absolute;
+    bottom: 16px; left: 12px; right: 12px;
+    background: white;
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    border-left: 4px solid var(--accent);
+  }
+  .mappa-overlay-title { font-weight: 700; font-size: 13px; color: var(--navy); margin-bottom: 4px; }
+  .mappa-overlay-addr  { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .mappa-overlay-badge {
+    display: inline-block;
+    font-size: 10px; font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: #eff6ff; color: #2563eb;
+    border: 1px solid #bfdbfe;
+    margin-bottom: 8px;
+  }
+  .mappa-btn {
+    background: var(--navy);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+  }
+  .fab {
+    position: absolute;
+    bottom: 24px; right: 20px;
+    width: 52px; height: 52px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    font-size: 24px;
+    box-shadow: 0 4px 20px rgba(232,93,4,0.5);
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s;
+  }
+  .fab:hover { transform: scale(1.1); }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    background: white;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-shrink: 0;
+  }
+  .nav-item {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 10px 0 8px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    gap: 3px;
+    transition: color 0.15s;
+    border: none;
+    background: none;
+  }
+  .nav-item.active { color: var(--navy); }
+  .nav-item span.icon { font-size: 20px; }
+
+  /* ── DEMO HEADER ── */
+  .demo-header {
+    text-align: center;
+    padding: 32px 20px 16px;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+  .demo-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .demo-title { font-size: 28px; font-weight: 700; color: var(--navy); line-height: 1.2; margin-bottom: 8px; }
+  .demo-sub   { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  .demo-footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+    color: var(--muted);
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  /* ── NOTIFICA ── */
+  .toast {
+    position: fixed;
+    top: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--navy);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="demo-header">
+  <div class="demo-badge">Demo Interattiva</div>
+  <div class="demo-title">CivicAlert</div>
+  <div class="demo-sub">Segnala buche, rifiuti e problemi stradali direttamente al tuo Comune via PEC certificata.</div>
+</div>
+
+<div class="shell">
+  <div class="phone">
+
+    <!-- NAVBAR -->
+    <div class="navbar">
+      <div class="logo">
+        <div class="logo-icon">🛡</div>
+        <div class="logo-text">Civic<span>Alert</span></div>
+      </div>
+      <div class="step-badge" id="stepBadge">Home</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+    <!-- SCREEN: HOME / MAPPA -->
+    <div class="screen active" id="screen-home">
+      <div class="mappa-mock">
+        <div class="mappa-grid"></div>
+        <!-- Strade simulate -->
+        <div class="strada-h" style="top:30%"></div>
+        <div class="strada-h" style="top:55%"></div>
+        <div class="strada-h" style="top:75%"></div>
+        <div class="strada-v" style="left:25%"></div>
+        <div class="strada-v" style="left:60%"></div>
+        <!-- Pin simulati -->
+        <div class="pin" style="left:28%;top:32%">
+          <div class="pin-pulse"></div>
+          <div class="pin-dot" style="background:#ea580c"></div>
+        </div>
+        <div class="pin" style="left:62%;top:57%">
+          <div class="pin-dot" style="background:#2563eb"></div>
+        </div>
+        <div class="pin" style="left:45%;top:78%">
+          <div class="pin-dot" style="background:#dc2626"></div>
+        </div>
+        <div class="pin" style="left:72%;top:35%">
+          <div class="pin-dot" style="background:#ca8a04"></div>
+        </div>
+        <!-- Dettaglio pin selezionato -->
+        <div class="mappa-overlay">
+          <div class="mappa-overlay-badge">📨 PEC inviata</div>
+          <div class="mappa-overlay-title">🕳 Buca / Dissesto stradale</div>
+          <div class="mappa-overlay-addr">📍 Via Roma 14, Messina, Sicilia</div>
+          <button class="mappa-btn" onclick="goTo('home')">Vedi dettaglio →</button>
+        </div>
+        <!-- FAB -->
+        <button class="fab" onclick="goTo('step1')" title="Nuova segnalazione">+</button>
+      </div>
+      <div class="bottom-nav">
+        <button class="nav-item active"><span class="icon">🗺️</span>Mappa</button>
+        <button class="nav-item" onclick="goTo('step1')"><span class="icon">📍</span>Segnala</button>
+        <button class="nav-item"><span class="icon">📋</span>Le mie</button>
+      </div>
+    </div>
+
+    <!-- SCREEN: STEP 1 — FOTO -->
+    <div class="screen" id="screen-step1">
+      <div class="scroll-area">
+        <div>
+          <h2 style="color:var(--navy);font-size:20px;font-weight:700;margin-bottom:4px;">Aggiungi una foto</h2>
+          <p style="color:var(--muted);font-size:13px;">Documenta il problema con un'immagine chiara.</p>
+        </div>
+
+        <div class="foto-preview" id="fotoPreview">
+          <img src="https://images.unsplash.com/photo-1515162305285-0293e4767cc2?w=800&q=80" alt="Buca strada" id="fotoImg">
+          <div class="foto-overlay">📷 Foto acquisita — 2.1 MB</div>
+          <button class="foto-delete" onclick="rimuoviFoto()">✕</button>
+        </div>
+
+        <div class="upload-zone" id="uploadZone" onclick="simulaFoto()">
+          <div class="upload-icon">📷</div>
+          <div class="upload-title">Tocca per scattare o caricare</div>
+          <div class="upload-sub">Foto o video fino a 50 MB</div>
+        </div>
+
+        <div class="media-grid">
+          <div class="media-btn" onclick="simulaFoto()"><span>📷</span>Fotocamera</div>
+          <div class="media-btn" onclick="simulaFoto()"><span>🖼️</span>Galleria</div>
+          <div class="media-btn" onclick="simulaFoto()"><span>🎥</span>Video</div>
+        </div>
+
+        <button class="btn-primary" id="btnStep1" onclick="goTo('step2')" style="opacity:0.4;pointer-events:none;">
+          Continua →
+        </button>
+      </div>
+    </div>
+
+    <!-- SCREEN: STEP 2 — CATEGORIA -->
+    <div class="screen" id="screen-step2">
+      <div class="scroll-area">
+        <div>
+          <h2 style="color:var(--navy);font-size:20px;font-weight:700;margin-bottom:4px;">Che problema è?</h2>
+          <p style="color:var(--muted);font-size:13px;">Seleziona la categoria.</p>
+        </div>
+
+        <div class="cat-grid">
+          <div class="cat-item" onclick="selezionaCategoria(this,'Buca / Dissesto stradale')">
+            <div class="cat-icon">🕳️</div>
+            <div class="cat-name">Buca / Dissesto stradale</div>
+            <div class="cat-check">✓</div>
+          </div>
+          <div class="cat-item" onclick="selezionaCategoria(this,'Oggetto ingombrante')">
+            <div class="cat-icon">🗑️</div>
+            <div class="cat-name">Oggetto ingombrante</div>
+            <div class="cat-check">✓</div>
+          </div>
+          <div class="cat-item" onclick="selezionaCategoria(this,'Illuminazione guasta')">
+            <div class="cat-icon">💡</div>
+            <div class="cat-name">Illuminazione guasta</div>
+            <div class="cat-check">✓</div>
+          </div>
+          <div class="cat-item" onclick="selezionaCategoria(this,'Incidente stradale')">
+            <div class="cat-icon">⚠️</div>
+            <div class="cat-name">Incidente stradale</div>
+            <div class="cat-check">✓</div>
+          </div>
+          <div class="cat-item" onclick="selezionaCategoria(this,'Altro problema')">
+            <div class="cat-icon">➕</div>
+            <div class="cat-name">Altro problema</div>
+            <div class="cat-check">✓</div>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:6px;">
+            Descrizione <span style="color:var(--muted);font-weight:400">(opzionale)</span>
+          </label>
+          <textarea rows="3" placeholder="Es. Buca profonda circa 20cm vicino all'incrocio con Via Roma, pericolosa per le bici…"></textarea>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-secondary" onclick="goTo('step1')">← Indietro</button>
+          <button class="btn-primary" id="btnStep2" onclick="goTo('step3')" style="opacity:0.4;pointer-events:none;">
+            Continua →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN: STEP 3 — CONFERMA -->
+    <div class="screen" id="screen-step3">
+      <div class="scroll-area">
+        <div>
+          <h2 style="color:var(--navy);font-size:20px;font-weight:700;margin-bottom:4px;">Controlla e invia</h2>
+          <p style="color:var(--muted);font-size:13px;">Verifica i dettagli prima di inviare.</p>
+        </div>
+
+        <div class="card">
+          <img class="recap-photo" src="https://images.unsplash.com/photo-1515162305285-0293e4767cc2?w=800&q=80" alt="">
+          <div class="card-body">
+            <div class="recap-row">
+              <div class="recap-icon">🕳️</div>
+              <div>
+                <div class="recap-label">Categoria</div>
+                <div class="recap-value" id="recapCategoria">Buca / Dissesto stradale</div>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div class="gps-box ok" id="gpsBox">
+              <div class="gps-label">📡 Posizione GPS</div>
+              <div class="gps-status ok" id="gpsStatus">✓ Posizione rilevata</div>
+              <div class="gps-addr" id="gpsAddr">Via Roma 14, Messina, Sicilia</div>
+              <div class="gps-coords">38.193611, 15.554444</div>
+            </div>
+            <div class="pec-box">
+              <div class="pec-label">📨 PEC destinataria</div>
+              <div class="pec-comune">🏛 Comune di Messina</div>
+              <div class="pec-addr">protocollo@pec.comune.messina.it</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;">
+          <span style="font-size:16px;flex-shrink:0">🛡️</span>
+          <p style="font-size:12px;color:#1e40af;line-height:1.5;">
+            La segnalazione verrà inviata al Comune tramite <strong>PEC certificata</strong> con ricevuta di consegna legalmente valida.
+          </p>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-secondary" onclick="goTo('step2')">← Indietro</button>
+          <button class="btn-primary accent" id="btnInvia" onclick="simulaInvio()">
+            Invia segnalazione →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN: SUCCESSO -->
+    <div class="screen" id="screen-successo">
+      <div class="scroll-area" style="align-items:center;text-align:center;">
+        <div class="success-icon">✅</div>
+
+        <div>
+          <h2 style="color:var(--navy);font-size:22px;font-weight:700;margin-bottom:6px;">Segnalazione inviata!</h2>
+          <p style="color:var(--muted);font-size:13px;line-height:1.6;">
+            La tua segnalazione è stata inviata via PEC al Comune di Messina.
+          </p>
+        </div>
+
+        <div class="id-box" style="width:100%">
+          <div class="id-label">Numero segnalazione</div>
+          <div class="id-value">SEG-A4F8</div>
+          <div class="id-sub">Conserva questo numero come prova certificata di segnalazione</div>
+        </div>
+
+        <div class="pec-confirm" style="width:100%">
+          <span style="font-size:20px">📨</span>
+          <div style="text-align:left">
+            <div style="font-weight:700;font-size:12px;">PEC consegnata</div>
+            <div style="font-size:11px;">protocollo@pec.comune.messina.it</div>
+          </div>
+        </div>
+
+        <div class="steps-after" style="width:100%;text-align:left;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:6px;">Cosa succede ora</div>
+          <div class="step-row">
+            <div class="step-num">1</div>
+            <div class="step-text">Il Comune riceve la PEC con foto e posizione GPS</div>
+          </div>
+          <div class="step-row">
+            <div class="step-num">2</div>
+            <div class="step-text">Ricevi la ricevuta di consegna come prova legale</div>
+          </div>
+          <div class="step-row">
+            <div class="step-num">3</div>
+            <div class="step-text">Segui lo stato nella sezione "Le mie segnalazioni"</div>
+          </div>
+        </div>
+
+        <button class="btn-primary accent" style="width:100%" onclick="goTo('step1')">+ Nuova segnalazione</button>
+        <button class="btn-secondary" style="width:100%" onclick="goTo('home')">← Torna alla mappa</button>
+      </div>
+    </div>
+
+  </div><!-- /phone -->
+</div><!-- /shell -->
+
+<div class="demo-footer">
+  <strong style="color:var(--navy)">CivicAlert</strong> — Segnalazione civica certificata<br>
+  Questa è una simulazione interattiva. I dati mostrati sono fittizi.
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let categoriaSelezionata = null;
+  let fotoCaricata = false;
+
+  const SCREENS = ['home','step1','step2','step3','successo'];
+
+  function goTo(name) {
+    SCREENS.forEach(s => {
+      document.getElementById('screen-' + s).classList.remove('active');
+    });
+    document.getElementById('screen-' + name).classList.add('active');
+
+    const stepMap = { home: 0, step1: 1, step2: 2, step3: 3, successo: 3 };
+    const labelMap = { home: 'Mappa', step1: 'Passo 1 di 3', step2: 'Passo 2 di 3', step3: 'Passo 3 di 3', successo: 'Completato' };
+    const step = stepMap[name];
+    document.getElementById('progressFill').style.width = (step / 3 * 100) + '%';
+    document.getElementById('stepBadge').textContent = labelMap[name];
+
+    if (name === 'step3' && categoriaSelezionata) {
+      document.getElementById('recapCategoria').textContent = categoriaSelezionata;
+    }
+    if (name === 'step3') simulaGPS();
+    window.scrollTo(0, 0);
+  }
+
+  function simulaFoto() {
+    fotoCaricata = true;
+    document.getElementById('fotoPreview').style.display = 'block';
+    document.getElementById('uploadZone').style.display = 'none';
+    document.getElementById('btnStep1').style.opacity = '1';
+    document.getElementById('btnStep1').style.pointerEvents = 'auto';
+    showToast('📷 Foto acquisita!');
+  }
+
+  function rimuoviFoto() {
+    fotoCaricata = false;
+    document.getElementById('fotoPreview').style.display = 'none';
+    document.getElementById('uploadZone').style.display = 'block';
+    document.getElementById('btnStep1').style.opacity = '0.4';
+    document.getElementById('btnStep1').style.pointerEvents = 'none';
+  }
+
+  function selezionaCategoria(el, nome) {
+    document.querySelectorAll('.cat-item').forEach(i => i.classList.remove('selected'));
+    el.classList.add('selected');
+    categoriaSelezionata = nome;
+    document.getElementById('btnStep2').style.opacity = '1';
+    document.getElementById('btnStep2').style.pointerEvents = 'auto';
+  }
+
+  function simulaGPS() {
+    const box = document.getElementById('gpsBox');
+    const status = document.getElementById('gpsStatus');
+    const addr = document.getElementById('gpsAddr');
+    box.className = 'gps-box loading';
+    status.className = 'gps-status loading';
+    status.textContent = '⏳ Rilevamento posizione…';
+    addr.textContent = '';
+    setTimeout(() => {
+      box.className = 'gps-box ok';
+      status.className = 'gps-status ok';
+      status.textContent = '✓ Posizione rilevata';
+      addr.textContent = 'Via Roma 14, Messina, Sicilia';
+      showToast('📍 GPS rilevato!');
+    }, 1800);
+  }
+
+  function simulaInvio() {
+    const btn = document.getElementById('btnInvia');
+    btn.innerHTML = '<span class="spinner"></span> Invio in corso…';
+    btn.style.pointerEvents = 'none';
+    btn.style.background = '#6b7280';
+    setTimeout(() => {
+      btn.innerHTML = '✓ Inviata!';
+      btn.style.background = '#16a34a';
+      setTimeout(() => goTo('successo'), 600);
+    }, 2200);
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // Avvia con la foto già caricata per facilitare la demo
+  setTimeout(() => { simulaFoto(); }, 300);
+</script>
+
+</body>
+</html>
