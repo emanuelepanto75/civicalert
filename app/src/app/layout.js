@@ -8,6 +8,8 @@ export const metadata = {
   manifest: '/manifest.webmanifest',
   appleWebApp: { capable: true, title: 'CivicAlerts', statusBarStyle: 'black-translucent' },
   icons: { icon: '/icons/icon-192.png', apple: '/icons/apple-touch-icon.png' },
+  // La traduzione automatica del browser modifica la pagina e manda in errore l'app
+  other: { google: 'notranslate' },
 };
 
 export const viewport = {
@@ -19,7 +21,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="it">
+    <html lang="it" translate="no">
       <body>
         {children}
         <ServiceWorker />
