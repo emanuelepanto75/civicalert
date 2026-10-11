@@ -20,6 +20,18 @@ export const config = {
   duplicateRadiusM: int(process.env.DUPLICATE_RADIUS_M, 50),
   // Giorni dopo cui si chiede al cittadino se il problema è stato risolto (Comuni senza cruscotto)
   reminderDays: int(process.env.REMINDER_DAYS, 15),
+  // Informativa privacy: titolare del trattamento e contatto
+  privacy: {
+    owner: process.env.TITOLARE_NOME || '',
+    address: process.env.TITOLARE_INDIRIZZO || '',
+    email: process.env.PRIVACY_EMAIL || 'info@civicalerts.it',
+  },
+  // Conservazione dei dati (vedi informativa): cancellazione automatica
+  retention: {
+    reportYears: int(process.env.REPORT_RETENTION_YEARS, 2),
+    inactiveAccountMonths: int(process.env.INACTIVE_ACCOUNT_MONTHS, 12),
+    unverifiedAccountDays: int(process.env.UNVERIFIED_ACCOUNT_DAYS, 30),
+  },
   maxGpsAccuracyM: int(process.env.MAX_GPS_ACCURACY_M, 200),
   maxUploadMb: int(process.env.MAX_UPLOAD_MB, 50),
   maxImageSidePx: int(process.env.MAX_IMAGE_SIDE_PX, 2048),

@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
+import Link from 'next/link';
+import DeleteAccount from './DeleteAccount';
 import LogoutButton from './LogoutButton';
 
 export default async function ProfilePage() {
@@ -19,6 +21,10 @@ export default async function ProfilePage() {
         </div>
       </div>
       <LogoutButton />
+      {user.role === 'CITIZEN' && <DeleteAccount />}
+      <p className="muted small center">
+        <Link href="/privacy">Informativa privacy</Link>
+      </p>
     </div>
   );
 }

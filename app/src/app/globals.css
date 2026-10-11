@@ -54,6 +54,11 @@ button, input, textarea, select { font: inherit; }
 .nav-item .icon { font-size: 21px; }
 .nav-item.active { color: var(--navy); }
 
+/* ── Informativa privacy ── */
+.privacy-text { font-size: 14px; line-height: 1.6; display: flex; flex-direction: column; gap: 10px; }
+.privacy-text h2 { font-size: 15px; color: var(--navy); margin-top: 6px; }
+.privacy-text ul { padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+
 /* ── Pagine ── */
 .page { padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; }
 .page h1 { color: var(--navy); font-size: 22px; }

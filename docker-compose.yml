@@ -5,8 +5,16 @@
 
 name: civicalert
 
+# Registri dei container: al massimo 5 file da 10 MB per servizio (poi i più vecchi vengono sovrascritti)
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
 services:
   db:
+    logging: *logging
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
@@ -22,6 +30,7 @@ services:
       retries: 20
 
   app:
+    logging: *logging
     build: ./app
     restart: unless-stopped
     init: true
@@ -37,6 +46,10 @@ services:
       MAX_REPORTS_PER_DAY: ${MAX_REPORTS_PER_DAY:-5}
       DUPLICATE_RADIUS_M: ${DUPLICATE_RADIUS_M:-50}
       REMINDER_DAYS: ${REMINDER_DAYS:-15}
+      # Informativa privacy
+      TITOLARE_NOME: ${TITOLARE_NOME:-}
+      TITOLARE_INDIRIZZO: ${TITOLARE_INDIRIZZO:-}
+      PRIVACY_EMAIL: ${PRIVACY_EMAIL:-info@civicalerts.it}
       MAX_GPS_ACCURACY_M: ${MAX_GPS_ACCURACY_M:-200}
       MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-50}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
@@ -59,6 +72,7 @@ services:
       - app_data:/data # foto/video caricati + chiave delle sessioni
 
   mailpit:
+    logging: *logging
     image: axllent/mailpit:latest
     restart: unless-stopped
     environment:
@@ -70,6 +84,7 @@ services:
       - mailpit_data:/data
 
   caddy:
+    logging: *logging
     image: caddy:2
     restart: unless-stopped
     depends_on:

@@ -8,9 +8,10 @@ Elenco delle attività decise e non ancora fatte. Aggiornato il 10/10/2026.
       attività pianificata `scripts/avvio.ps1` (guida: `INSTALLAZIONE_WINDOWS.md`, "Ripartenza automatica").
 - [ ] **Avviso "versione di prova"** nell'app, nella schermata finale e nell'email di ricevuta, attivo finché
       `PEC_OVERRIDE_TO` è impostato: le segnalazioni non arrivano ai Comuni.
-- [ ] **Privacy e consenso da rivedere**: informativa definitiva (titolare, finalità, basi giuridiche, destinatari,
-      tempi di conservazione, diritti, contatti), testo della casella in registrazione, eventuali consensi
-      facoltativi separati, età minima.
+- [x] **Privacy**: informativa completa, casella "almeno 14 anni", cancellazione account dal profilo,
+      cancellazione automatica (segnalazioni 2 anni, account inattivi 1 anno, non confermati 30 giorni).
+- [ ] **Privacy, da completare sul server**: `TITOLARE_NOME` e `TITOLARE_INDIRIZZO` nel `.env`; far rileggere
+      il testo da un professionista prima del lancio pubblico.
 - [ ] **Indirizzo internet di casa che cambia** (TIM): passare la gestione DNS a Cloudflare con aggiornamento
       automatico, oppure usare il tunnel Cloudflare.
 

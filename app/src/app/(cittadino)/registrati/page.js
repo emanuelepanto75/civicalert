@@ -52,9 +52,12 @@ export default function RegisterPage() {
         <input type="checkbox" checked={form.privacy} required
           onChange={(e) => setForm({ ...form, privacy: e.target.checked })} />
         <span>
-          Ho letto e accetto l’<Link href="/privacy" target="_blank">informativa sulla privacy</Link>.
+          Dichiaro di avere almeno 14 anni e di aver letto l’<Link href="/privacy" target="_blank">informativa sulla privacy</Link>.
         </span>
       </label>
+      <p className="muted small" style={{ marginTop: -6 }}>
+        Nome, email e telefono vengono inviati solo al Comune che riceve le tue segnalazioni; sulla mappa pubblica non compaiono mai.
+      </p>
 
       <button className="btn" disabled={loading}>
         {loading ? <span className="spinner" /> : 'Registrati'}
