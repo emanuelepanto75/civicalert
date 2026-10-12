@@ -1,6 +1,6 @@
 # CivicAlerts – cose da fare
 
-Elenco delle attività decise e non ancora fatte. Aggiornato il 10/10/2026.
+Elenco delle attività decise e non ancora fatte. Aggiornato il 12/10/2026.
 
 ## Prima di allargare le prove
 
@@ -16,6 +16,17 @@ Elenco delle attività decise e non ancora fatte. Aggiornato il 10/10/2026.
       automatico, oppure usare il tunnel Cloudflare.
 
 ## Prossimi sviluppi brevi
+
+- [ ] **Approvazione dell'amministratore prima dell'invio** (fase iniziale): interruttore nella dashboard
+      (o nel `.env`) che, se attivo, mette ogni nuova segnalazione "in attesa di approvazione"; la PEC parte
+      solo dopo "Approva" nella pagina Amministrazione, "Rifiuta" chiude la segnalazione con un messaggio al
+      cittadino. Nella segnalazione guidata e nella ricevuta una nota avvisa: "la segnalazione sarà inviata
+      al Comune dopo la verifica dell'amministratore".
+- [ ] **Nota nella PEC al Comune sugli altri canali**: in fondo al testo chiedere al Comune se per quel tipo
+      di problema esistono altri canali (email dell'ufficio, numero WhatsApp, app comunale) da usare in futuro,
+      con la risposta da inviare a `civicalerts@pec.it`; i canali ricevuti si annotano nella pagina Comuni.
+- [ ] **Blocco temporaneo dopo tentativi di accesso errati**: l'informativa privacy lo cita tra le misure di
+      sicurezza ma oggi non c'è; aggiungerlo (o togliere la frase dall'informativa).
 
 - [ ] **Pulsante "Condividi"** nella pagina della segnalazione: il cittadino sceglie se pubblicarla sui propri
       social (link alla pagina pubblica, nessun dato personale).
