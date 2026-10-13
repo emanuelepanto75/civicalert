@@ -128,3 +128,30 @@ Se l'IP pubblico cambia, aggiorna i record A su Aruba con il nuovo indirizzo. Pe
 mano le strade sono: chiedere all'operatore un **IP statico**, oppure spostare la gestione DNS su un
 servizio con **DNS dinamico** (es. Cloudflare, gratuito: si ricopiano i record della posta). Per il
 lancio vero resta consigliato il server cloud (`docs/INSTALLAZIONE_VPS.md`).
+
+### Avviso quando l'indirizzo cambia
+
+Ogni 10 minuti l'app confronta l'indirizzo internet di casa con il DNS di `civicalerts.it` e
+`app.civicalerts.it`. Se non corrispondono ti avvisa **una volta** (e di nuovo quando tutto torna a posto),
+con il nuovo indirizzo da mettere nei record A su Aruba.
+
+**Email**: nel `.env` aggiungi
+```
+ALERT_EMAIL=tua.email@esempio.it
+ALERT_DNS_HOSTS=civicalerts.it,app.civicalerts.it
+```
+(l'email parte dalla casella `noreply@civicalerts.it` già configurata).
+
+**WhatsApp** (facoltativo) con CallMeBot, servizio gratuito per messaggi a sé stessi:
+1. Salva in rubrica il numero indicato su <https://www.callmebot.com/blog/free-api-whatsapp-messages/>
+   (oggi +34 644 45 70 57).
+2. Da WhatsApp mandagli il messaggio `I allow callmebot to send me messages`.
+3. Entro due minuti ricevi la tua **apikey**; nel `.env` aggiungi
+   ```
+   ALERT_WHATSAPP_PHONE=+39TUONUMERO
+   ALERT_WHATSAPP_APIKEY=la-chiave-ricevuta
+   ```
+
+Poi `docker compose up -d`. Per una prova: `docker compose logs app | findstr "controllo ip"` mostra i
+controlli con un problema; per simulare un cambio metti temporaneamente in `ALERT_DNS_HOSTS` un dominio
+qualsiasi (es. `example.com`), riavvia e attendi il messaggio, poi rimetti i valori giusti.

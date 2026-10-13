@@ -1,6 +1,6 @@
 # CivicAlerts – cose da fare
 
-Elenco delle attività decise e non ancora fatte. Aggiornato il 12/10/2026.
+Elenco delle attività decise e non ancora fatte. Aggiornato il 13/10/2026.
 
 ## Prima di allargare le prove
 
@@ -13,7 +13,8 @@ Elenco delle attività decise e non ancora fatte. Aggiornato il 12/10/2026.
 - [ ] **Privacy, da completare sul server**: `TITOLARE_NOME` e `TITOLARE_INDIRIZZO` nel `.env`; far rileggere
       il testo da un professionista prima del lancio pubblico.
 - [ ] **Indirizzo internet di casa che cambia** (TIM): passare la gestione DNS a Cloudflare con aggiornamento
-      automatico, oppure usare il tunnel Cloudflare.
+      automatico, oppure usare il tunnel Cloudflare. Nel frattempo l'app avvisa via email/WhatsApp
+      quando il DNS non corrisponde più (`ALERT_*` nel `.env`).
 
 ## Prossimi sviluppi brevi
 
@@ -25,9 +26,6 @@ Elenco delle attività decise e non ancora fatte. Aggiornato il 12/10/2026.
 - [ ] **Nota nella PEC al Comune sugli altri canali**: in fondo al testo chiedere al Comune se per quel tipo
       di problema esistono altri canali (email dell'ufficio, numero WhatsApp, app comunale) da usare in futuro,
       con la risposta da inviare a `civicalerts@pec.it`; i canali ricevuti si annotano nella pagina Comuni.
-- [ ] **Blocco temporaneo dopo tentativi di accesso errati**: l'informativa privacy lo cita tra le misure di
-      sicurezza ma oggi non c'è; aggiungerlo (o togliere la frase dall'informativa).
-
 - [ ] **Pulsante "Condividi"** nella pagina della segnalazione: il cittadino sceglie se pubblicarla sui propri
       social (link alla pagina pubblica, nessun dato personale).
 - [ ] **Avviso in autostrada / strada extraurbana**: "Segnala solo se sei passeggero; per pericoli immediati

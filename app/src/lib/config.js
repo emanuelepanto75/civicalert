@@ -5,6 +5,14 @@ const int = (value, fallback) => {
   return Number.isFinite(n) ? n : fallback;
 };
 
+const hostOf = (url) => {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return '';
+  }
+};
+
 const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), '.data');
 
 // Tutti i parametri regolabili da variabili d'ambiente (vedi .env.example).
@@ -56,4 +64,17 @@ export const config = {
   nominatimUrl: process.env.NOMINATIM_URL || 'https://nominatim.openstreetmap.org',
   nominatimEmail: process.env.NOMINATIM_EMAIL || '',
   publicUrl: process.env.PUBLIC_URL || '',
+  // Server di casa con IP dinamico: avviso quando il DNS non punta più al server
+  ipWatch: {
+    minutes: int(process.env.IP_CHECK_MINUTES, 10),
+    hosts: (process.env.ALERT_DNS_HOSTS || hostOf(process.env.PUBLIC_URL))
+      .split(',')
+      .map((h) => h.trim())
+      .filter(Boolean),
+    email: process.env.ALERT_EMAIL || '',
+    whatsapp: {
+      phone: process.env.ALERT_WHATSAPP_PHONE || '',
+      apiKey: process.env.ALERT_WHATSAPP_APIKEY || '',
+    },
+  },
 };

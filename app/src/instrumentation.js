@@ -16,4 +16,12 @@ export async function register() {
   const retain = () => processRetention().catch((err) => console.error('[conservazione]', err));
   setTimeout(retain, 300_000).unref();
   setInterval(retain, 86_400_000).unref();
+  // Server di casa: avviso se l'indirizzo internet cambia e il DNS non è aggiornato
+  const { ipWatchEnabled, checkPublicIp } = await import('./lib/ipwatch');
+  if (ipWatchEnabled()) {
+    const { config } = await import('./lib/config');
+    const check = () => checkPublicIp().catch((err) => console.error('[controllo ip]', err.message));
+    setTimeout(check, 30_000).unref();
+    setInterval(check, config.ipWatch.minutes * 60_000).unref();
+  }
 }
