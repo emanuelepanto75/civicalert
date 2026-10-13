@@ -3,7 +3,7 @@ import { prisma } from './db';
 import { deleteMedia } from './media';
 
 const DAY = 86400000;
-const OPEN = ['PENDING', 'SENT', 'ACKNOWLEDGED'];
+const OPEN = ['REVIEW', 'PENDING', 'SENT', 'ACKNOWLEDGED'];
 let running = false;
 
 /**

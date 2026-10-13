@@ -8,6 +8,7 @@ import { baseUrl, jsonError, zodMessage } from '@/lib/http';
 import { MediaError, deleteMedia, saveMedia } from '@/lib/media';
 import { reportSchema } from '@/lib/reportInput';
 import { sendReceiptEmail } from '@/lib/emails';
+import { approvalRequired } from '@/lib/settings';
 import { authenticityFlags, findSameProblem, newReportCode, publicReport, reportsLeftToday } from '@/lib/reports';
 
 export const dynamic = 'force-dynamic';
@@ -17,7 +18,8 @@ export async function GET() {
   const since = new Date(Date.now() - 365 * 24 * 3600 * 1000);
   const reports = await prisma.report.findMany({
     // Lo stesso problema segnalato da più cittadini compare una volta sola
-    where: { createdAt: { gte: since }, status: { not: 'REJECTED' }, duplicateOfId: null },
+    // Le segnalazioni in verifica compaiono solo dopo l'approvazione
+    where: { createdAt: { gte: since }, status: { notIn: ['REJECTED', 'REVIEW'] }, duplicateOfId: null },
     orderBy: { createdAt: 'desc' },
     take: 1000,
     include: { category: true, municipality: true },
@@ -81,7 +83,9 @@ export async function POST(request) {
       longitude: input.longitude,
       gpsAccuracyM: input.accuracy,
     });
-    const pecTo = municipality?.notifyPec ? municipality.pecAddress : null;
+    // Fase iniziale: la PEC parte solo dopo l'approvazione dell'amministratore
+    const review = await approvalRequired();
+    const pecTo = !review && municipality?.notifyPec ? municipality.pecAddress : null;
 
     const report = await prisma.report.create({
       data: {
@@ -100,6 +104,7 @@ export async function POST(request) {
         photoGpsDistM,
         authenticity: flags,
         duplicateOfId: sameProblem?.first?.id ?? null,
+        ...(review && { status: 'REVIEW' }),
         deliveries: pecTo ? { create: { channel: 'PEC', recipient: pecTo } } : undefined,
       },
     });
@@ -117,7 +122,7 @@ export async function POST(request) {
       where: { id: report.id },
       include: { category: true, municipality: true, deliveries: true, user: true },
     });
-    const pecStatus = saved.deliveries[0]?.status === 'SENT' ? 'SENT' : pecTo ? 'PENDING' : null;
+    const pecStatus = review ? 'REVIEW' : saved.deliveries[0]?.status === 'SENT' ? 'SENT' : pecTo ? 'PENDING' : null;
     sendReceiptEmail({
       report: saved,
       pec: pecStatus,
@@ -125,7 +130,7 @@ export async function POST(request) {
       siteUrl: baseUrl(request),
     }).catch((e) => console.error('[ricevuta]', e.message));
     return NextResponse.json(
-      { report: publicReport(saved, { includeOwner: true, viewerId: user.id }), routed: Boolean(pecTo) },
+      { report: publicReport(saved, { includeOwner: true, viewerId: user.id }), routed: Boolean(pecTo), review },
       { status: 201 },
     );
   } catch (err) {

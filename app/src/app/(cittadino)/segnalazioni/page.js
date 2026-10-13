@@ -24,7 +24,7 @@ export default async function PublicReportsPage({ searchParams }) {
   const visible = { duplicateOfId: null, municipalityId: { not: null } };
   const groups = await prisma.report.groupBy({
     by: ['municipalityId'],
-    where: { ...visible, status: { not: 'REJECTED' } },
+    where: { ...visible, status: { notIn: ['REJECTED', 'REVIEW'] } },
     _count: { _all: true },
   });
   const comuni = await prisma.municipality.findMany({

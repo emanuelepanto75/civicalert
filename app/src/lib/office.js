@@ -6,6 +6,7 @@ import { jsonError } from './http';
 
 // Etichette degli stati dal punto di vista dell'ufficio comunale.
 export const OFFICE_STATUS = {
+  REVIEW: 'Da approvare',
   PENDING: 'Ricevuta (PEC non inviata)',
   SENT: 'Nuova',
   ACKNOWLEDGED: 'In lavorazione',
@@ -23,6 +24,7 @@ export const STATUS_FILTERS = {
   risolte: { label: 'Risolte', statuses: ['RESOLVED'] },
   respinte: { label: 'Respinte', statuses: ['REJECTED'] },
   tutte: { label: 'Tutte', statuses: null },
+  verifica: { label: 'Da approvare', statuses: ['REVIEW'], adminOnly: true },
 };
 
 // Per le pagine /ufficio: reindirizza chi non è operatore o amministratore.
@@ -81,6 +83,8 @@ export function buildWhere(user, filters) {
   const where = { ...scopeWhere(user, filters) };
   const statuses = STATUS_FILTERS[filters.stato].statuses;
   if (statuses) where.status = { in: statuses };
+  // Le segnalazioni in verifica non sono ancora arrivate al Comune: solo l'amministratore le vede
+  if (user.role !== 'ADMIN') where.status = statuses ? { in: statuses.filter((s) => s !== 'REVIEW') } : { not: 'REVIEW' };
   if (filters.categoria) where.categoryId = filters.categoria;
   const from = toDate(filters.dal);
   const to = toDate(filters.al, true);
@@ -108,7 +112,7 @@ export async function findScopedReport(user, code) {
     },
   });
   if (!report) return null;
-  if (user.role !== 'ADMIN' && report.municipalityId !== user.municipalityId) return null;
+  if (user.role !== 'ADMIN' && (report.municipalityId !== user.municipalityId || report.status === 'REVIEW')) return null;
   return report;
 }
 

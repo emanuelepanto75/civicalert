@@ -28,6 +28,9 @@ export const config = {
   duplicateRadiusM: int(process.env.DUPLICATE_RADIUS_M, 50),
   // Giorni dopo cui si chiede al cittadino se il problema è stato risolto (Comuni senza cruscotto)
   reminderDays: int(process.env.REMINDER_DAYS, 15),
+  // Fase iniziale: le segnalazioni partono solo dopo l'approvazione dell'amministratore.
+  // Valore iniziale; poi si cambia dalla dashboard (pagina "Da approvare").
+  approvalRequired: process.env.APPROVAL_REQUIRED !== 'false',
   // Informativa privacy: titolare del trattamento e contatto
   privacy: {
     owner: process.env.TITOLARE_NOME || '',

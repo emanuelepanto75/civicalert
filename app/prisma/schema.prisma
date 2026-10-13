@@ -133,6 +133,7 @@ enum MediaType {
 }
 
 enum ReportStatus {
+  REVIEW       // in verifica: la PEC parte solo dopo l'approvazione dell'amministratore
   PENDING      // salvata, invio non ancora riuscito / comune non configurato
   SENT         // PEC inviata al comune
   ACKNOWLEDGED // presa in carico
@@ -192,4 +193,13 @@ model ReportEvent {
 enum EventKind {
   STATUS // cambio di stato
   NOTE   // nota interna dell'ufficio
+}
+
+// Impostazioni modificabili dalla dashboard dell'amministratore
+model Setting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("settings")
 }

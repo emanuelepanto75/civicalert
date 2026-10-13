@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/db';
 import { mediaUrl } from '@/lib/media';
 import { OFFICE_STATUS, findScopedReport, requireStaffPage } from '@/lib/office';
+import ApprovalActions from '@/components/office/ApprovalActions';
 import StatusPanel from './StatusPanel';
 import NoteForm from './NoteForm';
 
@@ -124,7 +125,15 @@ export default async function OfficeReportPage({ params }) {
         </div>
 
         <div className="col">
-          <StatusPanel code={report.code} status={report.status} hasCitizen={Boolean(report.user)} />
+          {report.status === 'REVIEW' ? (
+            <div className="panel">
+              <h2>Da approvare</h2>
+              <p className="muted small">La PEC al Comune parte solo dopo l’approvazione.</p>
+              <ApprovalActions code={report.code} hasPec={Boolean(report.municipality?.notifyPec && report.municipality.pecAddress)} />
+            </div>
+          ) : (
+            <StatusPanel code={report.code} status={report.status} hasCitizen={Boolean(report.user)} />
+          )}
           <div className="panel">
             <h2>Storico</h2>
             <NoteForm code={report.code} />

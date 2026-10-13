@@ -18,11 +18,9 @@ Elenco delle attività decise e non ancora fatte. Aggiornato il 13/10/2026.
 
 ## Prossimi sviluppi brevi
 
-- [ ] **Approvazione dell'amministratore prima dell'invio** (fase iniziale): interruttore nella dashboard
-      (o nel `.env`) che, se attivo, mette ogni nuova segnalazione "in attesa di approvazione"; la PEC parte
-      solo dopo "Approva" nella pagina Amministrazione, "Rifiuta" chiude la segnalazione con un messaggio al
-      cittadino. Nella segnalazione guidata e nella ricevuta una nota avvisa: "la segnalazione sarà inviata
-      al Comune dopo la verifica dell'amministratore".
+- [x] **Approvazione dell'amministratore prima dell'invio** (fase iniziale): pagina Ufficio › Da approvare
+      con interruttore; la PEC parte solo dopo "Approva", "Non approvare" chiude la segnalazione con il motivo
+      inviato al cittadino. Nota per il cittadino durante la segnalazione, nella ricevuta e nella pagina.
 - [ ] **Nota nella PEC al Comune sugli altri canali**: in fondo al testo chiedere al Comune se per quel tipo
       di problema esistono altri canali (email dell'ufficio, numero WhatsApp, app comunale) da usare in futuro,
       con la risposta da inviare a `civicalerts@pec.it`; i canali ricevuti si annotano nella pagina Comuni.

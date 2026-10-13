@@ -25,6 +25,8 @@ export default async function ReportDetailPage({ params }) {
   if (!raw) notFound();
   const user = await getCurrentUser();
   const isOwner = Boolean(user && raw.userId === user.id);
+  // In verifica: la vede solo chi l'ha fatta
+  if (raw.status === 'REVIEW' && !isOwner) notFound();
   const r = publicReport(raw, { includeOwner: isOwner, viewerId: user?.id });
   const open = !['RESOLVED', 'REJECTED'].includes(r.status);
 
@@ -68,6 +70,13 @@ export default async function ReportDetailPage({ params }) {
           )}
         </div>
       </div>
+
+      {isOwner && r.status === 'REVIEW' && (
+        <div className="alert warn">
+          🕵️ La segnalazione è in verifica: verrà inviata via PEC al Comune dopo l’approvazione dell’amministratore.
+          Ti avviseremo via email.
+        </div>
+      )}
 
       {isOwner && r.deliveries?.length > 0 && (
         <div className="card">

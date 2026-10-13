@@ -123,7 +123,7 @@ export default async function OfficeDashboard({ searchParams }) {
           <label>
             Stato
             <select name="stato" defaultValue={filters.stato}>
-              {Object.entries(STATUS_FILTERS).map(([key, f]) => (
+              {Object.entries(STATUS_FILTERS).filter(([, f]) => !f.adminOnly || user.role === 'ADMIN').map(([key, f]) => (
                 <option key={key} value={key}>{f.label}</option>
               ))}
             </select>

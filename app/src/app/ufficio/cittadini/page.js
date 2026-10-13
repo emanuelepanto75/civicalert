@@ -11,7 +11,7 @@ const ORDER = {
   recenti: { label: 'Iscritti più di recente', orderBy: { createdAt: 'desc' } },
   segnalazioni: { label: 'Più segnalazioni', orderBy: [{ reports: { _count: 'desc' } }, { createdAt: 'desc' }] },
 };
-const OPEN = ['PENDING', 'SENT', 'ACKNOWLEDGED'];
+const OPEN = ['REVIEW', 'PENDING', 'SENT', 'ACKNOWLEDGED'];
 const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
 const FILTERS = {
   tutti: { label: 'Tutti', where: {} },

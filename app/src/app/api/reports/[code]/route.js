@@ -13,5 +13,6 @@ export async function GET(request, { params }) {
   if (!report) return jsonError('Segnalazione non trovata', 404);
   const user = await getCurrentUser();
   const isOwner = user && report.userId === user.id;
+  if (report.status === 'REVIEW' && !isOwner) return jsonError('Segnalazione non trovata', 404);
   return NextResponse.json({ report: publicReport(report, { includeOwner: isOwner, viewerId: user?.id }) });
 }

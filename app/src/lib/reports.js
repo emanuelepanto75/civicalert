@@ -23,11 +23,14 @@ export function distanceMeters(lat1, lon1, lat2, lon2) {
  * Stesso problema già segnalato: segnalazioni ancora aperte della stessa
  * categoria entro DUPLICATE_RADIUS_M. Non blocca l'invio (il Comune deve sapere
  * che più cittadini lo segnalano), tranne quando a ripeterla è lo stesso utente.
+ * Le segnalazioni di altri ancora in verifica non contano: non sono ancora
+ * arrivate al Comune e potrebbero non essere approvate.
  * Restituisce null se non ce ne sono, altrimenti la prima segnalazione del
  * problema (`first`), quante sono finora (`count`), la più vicina e se una è
- * dell'utente stesso (`mine`).
+ * dell'utente stesso (`mine`). `excludeId` esclude una segnalazione (quella che
+ * si sta approvando).
  */
-export async function findSameProblem({ categoryId, latitude, longitude, userId }) {
+export async function findSameProblem({ categoryId, latitude, longitude, userId, excludeId = null }) {
   const radius = config.duplicateRadiusM;
   // Prefiltro su un riquadro di coordinate (veloce), poi distanza esatta.
   const dLat = radius / 111320;
@@ -36,30 +39,28 @@ export async function findSameProblem({ categoryId, latitude, longitude, userId 
     await prisma.report.findMany({
       where: {
         categoryId,
-        status: { in: OPEN_STATUSES },
+        status: { in: [...OPEN_STATUSES, 'REVIEW'] },
         latitude: { gte: latitude - dLat, lte: latitude + dLat },
         longitude: { gte: longitude - dLon, lte: longitude + dLon },
+        ...(excludeId && { id: { not: excludeId } }),
       },
-      select: { id: true, code: true, userId: true, latitude: true, longitude: true, createdAt: true, duplicateOfId: true },
+      select: { id: true, code: true, userId: true, status: true, latitude: true, longitude: true, createdAt: true, duplicateOfId: true },
     })
   )
     .map((r) => ({ ...r, distance: distanceMeters(latitude, longitude, r.latitude, r.longitude) }))
     .filter((r) => r.distance <= radius);
-  if (nearby.length === 0) return null;
+  const mine = nearby.find((r) => userId && r.userId === userId) || null;
+  const others = nearby.filter((r) => r.status !== 'REVIEW');
+  if (others.length === 0) return mine ? { first: null, count: 0, nearest: null, mine } : null;
 
-  const oldest = nearby.reduce((a, b) => (a.createdAt <= b.createdAt ? a : b));
+  const oldest = others.reduce((a, b) => (a.createdAt <= b.createdAt ? a : b));
   const firstId = oldest.duplicateOfId || oldest.id;
   const [first, count] = await Promise.all([
     prisma.report.findUnique({ where: { id: firstId }, select: { id: true, code: true, createdAt: true } }),
-    prisma.report.count({ where: { OR: [{ id: firstId }, { duplicateOfId: firstId }] } }),
+    prisma.report.count({ where: { OR: [{ id: firstId }, { duplicateOfId: firstId }], status: { not: 'REVIEW' } } }),
   ]);
-  const nearest = nearby.reduce((a, b) => (a.distance <= b.distance ? a : b));
-  return {
-    first,
-    count,
-    nearest: { code: nearest.code, distance: nearest.distance },
-    mine: nearby.find((r) => r.userId === userId) || null,
-  };
+  const nearest = others.reduce((a, b) => (a.distance <= b.distance ? a : b));
+  return { first, count, nearest: { code: nearest.code, distance: nearest.distance }, mine };
 }
 
 // Anti-spam: numero massimo di segnalazioni per utente nelle ultime 24 ore.
@@ -85,6 +86,7 @@ export function authenticityFlags({ exif, latitude, longitude, gpsAccuracyM }) {
 }
 
 export const STATUS_LABELS = {
+  REVIEW: 'In verifica',
   PENDING: 'In attesa di invio',
   SENT: 'PEC inviata al Comune',
   ACKNOWLEDGED: 'Presa in carico',

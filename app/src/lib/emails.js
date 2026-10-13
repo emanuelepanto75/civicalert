@@ -78,7 +78,8 @@ function detailsTable(rows) {
 
 /**
  * Ricevuta al cittadino dopo l'invio. `pec` = esito dell'invio al Comune:
- * 'SENT' | 'PENDING' | null (Comune senza PEC); `sameProblem` = quante
+ * 'SENT' | 'PENDING' | 'REVIEW' (in attesa di approvazione) | null (Comune
+ * senza PEC); `sameProblem` = quante
  * segnalazioni dello stesso problema esistono, compresa questa.
  */
 export function sendReceiptEmail({ report, pec, sameProblem = 1, siteUrl }) {
@@ -87,6 +88,7 @@ export function sendReceiptEmail({ report, pec, sameProblem = 1, siteUrl }) {
   const pecLine = {
     SENT: `La segnalazione è stata inviata via PEC al Comune di ${comune}.`,
     PENDING: `La segnalazione verrà inviata via PEC al Comune di ${comune} nei prossimi minuti.`,
+    REVIEW: `In questa prima fase ogni segnalazione viene controllata dall'amministratore di CivicAlerts e inviata via PEC al ${comune ? `Comune di ${comune}` : 'Comune competente'} solo dopo l'approvazione. Ti scriveremo appena verificata.`,
   }[pec] || 'Non è stato possibile individuare un indirizzo PEC per questa zona: la segnalazione è registrata ma non è stata inviata a un Comune.';
   const repeatLine =
     sameProblem > 1
@@ -125,5 +127,37 @@ export function sendReminderEmail({ report, days, siteUrl }) {
       'Apri la segnalazione',
     ),
     text: `${days} giorni fa hai segnalato "${report.category.name}" (${report.code}). Se il problema è stato risolto, apri la segnalazione e premi "Segna come risolta": ${link}`,
+  });
+}
+
+/**
+ * Esito della verifica dell'amministratore. Approvata: `pec` dice se la PEC è
+ * già partita ('SENT'), è in invio ('PENDING') o il Comune non ha PEC (null).
+ * Non approvata: `note` spiega il motivo.
+ */
+export function sendReviewEmail({ report, approved, pec, note, siteUrl }) {
+  const link = `${siteUrl}/segnalazioni/${report.code}`;
+  const comune = report.municipality?.name;
+  const what = approved
+    ? {
+        SENT: `è stata verificata e inviata via PEC al Comune di ${comune}`,
+        PENDING: `è stata verificata e verrà inviata via PEC al Comune di ${comune} nei prossimi minuti`,
+      }[pec] || 'è stata verificata, ma per questa zona non c’è un Comune raggiungibile via PEC: resta registrata'
+    : 'non è stata approvata e non verrà inviata al Comune';
+  const noteHtml = note
+    ? `<p style="background:#f8f9fb;border-left:3px solid #1A3A6B;padding:10px 14px"><b>Motivo:</b><br>${escapeHtml(note)}</p>`
+    : '';
+  return sendMail({
+    to: report.user.email,
+    subject: `CivicAlerts – la segnalazione ${report.code} ${approved ? 'è stata approvata' : 'non è stata approvata'}`,
+    html: layout(
+      `Segnalazione ${report.code}`,
+      `Ciao ${escapeHtml(report.user.firstName)}, la tua segnalazione “${escapeHtml(report.category.name)}” ${escapeHtml(what)}.${noteHtml}${
+        approved ? '<p>Ti avviseremo via email quando il Comune la aggiorna.</p>' : ''
+      }`,
+      link,
+      'Vedi la segnalazione',
+    ),
+    text: `La tua segnalazione ${report.code} ${what}.${note ? `\n\nMotivo: ${note}` : ''}\n\n${link}`,
   });
 }

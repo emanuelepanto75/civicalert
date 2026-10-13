@@ -45,6 +45,8 @@ services:
       MAX_REPORTS_PER_DAY: ${MAX_REPORTS_PER_DAY:-5}
       DUPLICATE_RADIUS_M: ${DUPLICATE_RADIUS_M:-50}
       REMINDER_DAYS: ${REMINDER_DAYS:-15}
+      # Approvazione dell'amministratore prima della PEC (valore iniziale; poi si cambia dalla dashboard)
+      APPROVAL_REQUIRED: ${APPROVAL_REQUIRED:-true}
       # Informativa privacy
       TITOLARE_NOME: ${TITOLARE_NOME:-}
       TITOLARE_INDIRIZZO: ${TITOLARE_INDIRIZZO:-}

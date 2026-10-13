@@ -7,7 +7,7 @@ import { useGeolocation } from './useGeolocation';
 
 const STEP_LABELS = ['Foto', 'Categoria', 'Invio'];
 
-export default function ReportWizard({ categories }) {
+export default function ReportWizard({ categories, review }) {
   const [step, setStep] = useState(0);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -39,6 +39,7 @@ export default function ReportWizard({ categories }) {
       <div className="progress"><div style={{ width: `${((step + 1) / 3) * 100}%` }} /></div>
       <div className="page">
         <div className="steps-label">Passo {step + 1} di 3 · {STEP_LABELS[step]}</div>
+        {review && step === 0 && <ReviewNotice />}
         {step === 0 && <PhotoStep file={file} preview={preview} setFile={setFile} onNext={() => setStep(1)} />}
         {step === 1 && (
           <CategoryStep
@@ -58,6 +59,7 @@ export default function ReportWizard({ categories }) {
             category={categories.find((c) => c.id === categoryId)}
             description={description}
             geo={geo}
+            review={review}
             onBack={() => setStep(1)}
             onDone={setResult}
           />
@@ -150,7 +152,7 @@ function CategoryStep({ categories, categoryId, setCategoryId, description, setD
   );
 }
 
-function ReviewStep({ file, preview, category, description, geo, onBack, onDone }) {
+function ReviewStep({ file, preview, category, description, geo, review, onBack, onDone }) {
   const [check, setCheck] = useState(null);
   const [checking, setChecking] = useState(false);
   const [sending, setSending] = useState(false);
@@ -267,6 +269,7 @@ function ReviewStep({ file, preview, category, description, geo, onBack, onDone 
       )}
       {error && <div className="alert error">{error}</div>}
 
+      {review && <ReviewNotice />}
       <div className="alert info small">
         🛡️ La segnalazione sarà inviata al Comune tramite <strong>PEC</strong>, con ricevuta di consegna legalmente valida.
         Al Comune verranno comunicati nome, email e telefono; sulla mappa pubblica no.
@@ -282,9 +285,40 @@ function ReviewStep({ file, preview, category, description, geo, onBack, onDone 
   );
 }
 
+// Fase iniziale: la segnalazione parte solo dopo l'approvazione dell'amministratore.
+function ReviewNotice() {
+  return (
+    <div className="alert warn small">
+      🕵️ <strong>Fase di avvio:</strong> ogni segnalazione viene controllata dall’amministratore di CivicAlerts e inviata
+      al Comune di appartenenza <strong>solo dopo l’approvazione</strong>. Ti avviseremo via email appena verificata.
+    </div>
+  );
+}
+
 function Success({ result }) {
-  const { report, routed } = result;
+  const { report, routed, review } = result;
   const pec = report.deliveries?.[0];
+  if (review) {
+    return (
+      <div className="page center">
+        <div className="success-icon">✅</div>
+        <div>
+          <h1>Segnalazione registrata!</h1>
+          <p className="muted">
+            Ora è <strong>in verifica</strong>: dopo l’approvazione dell’amministratore verrà inviata via PEC
+            {report.municipality ? ` al Comune di ${report.municipality}` : ' al Comune competente'}. Ti scriveremo via email.
+          </p>
+        </div>
+        <div className="code-box">
+          <div className="steps-label">Numero segnalazione</div>
+          <div className="code">{report.code}</div>
+          <div className="muted small">Conservalo come riferimento della tua segnalazione.</div>
+        </div>
+        <Link href={`/segnalazioni/${report.code}`} className="btn">Vedi la segnalazione</Link>
+        <a href="/segnala" className="btn secondary">+ Nuova segnalazione</a>
+      </div>
+    );
+  }
   return (
     <div className="page center">
       <div className="success-icon">✅</div>

@@ -200,6 +200,10 @@ risoluzione / respingimento con email automatica al cittadino, note interne e st
 Nel menu in alto, oltre al Cruscotto:
 - **Panoramica**: numeri di tutta la piattaforma, andamento settimanale, classifica dei Comuni,
   segnalazioni sospette, cittadini più attivi, avvisi su PEC non consegnate e modalità collaudo.
+- **Da approvare** (con il numero in attesa): finché l'approvazione è attiva le nuove segnalazioni si fermano
+  qui e la PEC al Comune parte solo con **Approva e invia la PEC**; **Non approvare** la chiude e manda al
+  cittadino il motivo. Il pulsante in cima disattiva o riattiva l'approvazione (invio diretto al Comune).
+  Gli operatori dei Comuni vedono una segnalazione solo dopo l'approvazione.
 - **Cittadini**: ricerca, ordinamento per numero di segnalazioni (aperte/risolte, clic per vederle), blocca/sblocca, elimina (a scelta anche segnalazioni e foto).
 - **Comuni**: ricerca fra tutti i comuni, correzione dell'indirizzo PEC e attivazione/disattivazione dell'invio; gli invii non riusciti passano al nuovo indirizzo.
 - **Operatori**: crea gli account dei Comuni, blocca/sblocca, nuova password, elimina.

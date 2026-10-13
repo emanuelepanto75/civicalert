@@ -2,6 +2,7 @@ import Link from 'next/link';
 import LogoutButton from '@/components/office/LogoutButton';
 import { requireStaffPage } from '@/lib/office';
 import { prisma } from '@/lib/db';
+import { countToReview } from '@/lib/approval';
 
 export const metadata = { title: 'Ufficio segnalazioni – CivicAlerts' };
 
@@ -11,6 +12,7 @@ export default async function OfficeLayout({ children }) {
   const municipality = user.municipalityId
     ? await prisma.municipality.findUnique({ where: { id: user.municipalityId } })
     : null;
+  const toReview = user.role === 'ADMIN' ? await countToReview() : 0;
   return (
     <div className="office">
       <header className="office-top">
@@ -26,6 +28,9 @@ export default async function OfficeLayout({ children }) {
           {user.role === 'ADMIN' && (
             <>
               <Link href="/ufficio/amministrazione">Panoramica</Link>
+              <Link href="/ufficio/approvazioni">
+                Da approvare{toReview > 0 && <span className="nav-count">{toReview}</span>}
+              </Link>
               <Link href="/ufficio/cittadini">Cittadini</Link>
               <Link href="/ufficio/comuni">Comuni</Link>
               <Link href="/ufficio/operatori">Operatori</Link>

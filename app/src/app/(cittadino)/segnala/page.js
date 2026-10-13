@@ -1,9 +1,11 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { approvalRequired } from '@/lib/settings';
 import ReportWizard from './ReportWizard';
 
 export const metadata = { title: 'Nuova segnalazione – CivicAlerts' };
+export const dynamic = 'force-dynamic';
 
 export default async function NewReportPage() {
   const user = await getCurrentUser();
@@ -13,5 +15,5 @@ export default async function NewReportPage() {
     orderBy: { sortOrder: 'asc' },
     select: { id: true, name: true, icon: true },
   });
-  return <ReportWizard categories={categories} />;
+  return <ReportWizard categories={categories} review={await approvalRequired()} />;
 }
