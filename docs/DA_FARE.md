@@ -21,9 +21,10 @@ Elenco delle attività decise e non ancora fatte. Aggiornato il 13/10/2026.
 - [x] **Approvazione dell'amministratore prima dell'invio** (fase iniziale): pagina Ufficio › Da approvare
       con interruttore; la PEC parte solo dopo "Approva", "Non approvare" chiude la segnalazione con il motivo
       inviato al cittadino. Nota per il cittadino durante la segnalazione, nella ricevuta e nella pagina.
-- [ ] **Nota nella PEC al Comune sugli altri canali**: in fondo al testo chiedere al Comune se per quel tipo
-      di problema esistono altri canali (email dell'ufficio, numero WhatsApp, app comunale) da usare in futuro,
-      con la risposta da inviare a `civicalerts@pec.it`; i canali ricevuti si annotano nella pagina Comuni.
+- [x] **Nota nella PEC al Comune sugli altri canali**: riquadro "Perché ricevete questa PEC" in fondo a ogni PEC,
+      con la richiesta di indirizzi, WhatsApp o gestori specifici da comunicare a `civicalerts@pec.it`.
+- [ ] **Annotare i canali ricevuti dai Comuni** nella pagina Comuni (oggi solo la PEC; vedi "Indirizzo diverso
+      per categoria" più sotto).
 - [ ] **Pulsante "Condividi"** nella pagina della segnalazione: il cittadino sceglie se pubblicarla sui propri
       social (link alla pagina pubblica, nessun dato personale).
 - [ ] **Avviso in autostrada / strada extraurbana**: "Segnala solo se sei passeggero; per pericoli immediati
