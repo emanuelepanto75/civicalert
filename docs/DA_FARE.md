@@ -1,6 +1,6 @@
 # CivicAlerts – cose da fare
 
-Elenco delle attività decise: prima quelle ancora da fare, in fondo quelle già fatte. Aggiornato il 13/10/2026.
+Elenco delle attività decise: prima quelle ancora da fare, in fondo quelle già fatte. Aggiornato il 15/10/2026.
 
 ## Da fare sul server di casa
 
@@ -23,6 +23,15 @@ Elenco delle attività decise: prima quelle ancora da fare, in fondo quelle già
 ## Prima di allargare le prove
 
 - [ ] **Informativa privacy definitiva**: revisione del legale (bozza pronta), poi inserimento nella pagina Privacy.
+      Da includere nella versione definitiva (verifica del 15/10/2026):
+      - [ ] **Età minima**: chiedere al legale se tenere 14 anni o alzare a 18 (base giuridica = servizio richiesto,
+            nome e telefono arrivano al Comune via PEC). Oggi: casella obbligatoria "almeno 14 anni".
+      - [ ] **Mappa**: il browser di chi guarda la mappa scarica le tessere dai server di OpenStreetMap (UK),
+            che ricevono l'indirizzo IP; oggi l'informativa cita OSM solo per la ricerca indirizzi.
+      - [ ] **Backup**: le copie di sicurezza notturne si conservano 30 giorni (anche dopo una cancellazione);
+            vale anche per le copie fuori dal server.
+      - Già a posto: nessun font esterno (solo font di sistema), un solo cookie tecnico di sessione dopo
+        l'accesso (nessun banner necessario), cancellazione dell'account dal profilo funzionante.
 - [ ] **Avviso "versione di prova"** nell'app, nella schermata finale e nell'email di ricevuta, attivo finché
       `PEC_OVERRIDE_TO` è impostato: le segnalazioni non arrivano ai Comuni.
 - [ ] **Indirizzo internet di casa che cambia** (TIM): passare la gestione DNS a Cloudflare con aggiornamento
@@ -30,6 +39,8 @@ Elenco delle attività decise: prima quelle ancora da fare, in fondo quelle già
 
 ## Prossimi sviluppi brevi
 
+- [ ] **Cancellazione anche delle proprie segnalazioni**: in "Elimina account" dare la scelta di cancellare
+      anche segnalazioni e foto (oggi restano anonime; altrimenti serve una richiesta via email).
 - [ ] **Annotare i canali ricevuti dai Comuni** (indirizzi, WhatsApp, gestori) nella pagina Comuni, in risposta
       alla nota nella PEC.
 - [ ] **Pulsante "Condividi"** nella pagina della segnalazione: il cittadino sceglie se pubblicarla sui propri
@@ -50,6 +61,8 @@ Elenco delle attività decise: prima quelle ancora da fare, in fondo quelle già
 - [ ] **Lettura automatica delle risposte** dei Comuni che arrivano su `civicalerts@pec.it`, collegate alla
       segnalazione tramite il codice nell'oggetto.
 - [ ] **Registrazione con SPID / CIE** (tramite soggetto aggregatore) e verifica del telefono con SMS.
+- [ ] **Fornitore delle mappe** per il lancio pubblico: i server di OpenStreetMap non vanno usati per app con
+      molto traffico (regole d'uso OSM); scegliere un servizio di tessere (o ospitarle) e aggiornare l'informativa.
 - [ ] **Passaggio al server cloud** (`INSTALLAZIONE_VPS.md`) per il lancio pubblico.
 
 ## Fatto
