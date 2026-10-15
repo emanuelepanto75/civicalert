@@ -1,0 +1,24 @@
+# Pagina di presentazione su https://civicalerts.it e https://www.civicalerts.it
+# Per attivarla: copia questo file in caddy/pubblico/ e riavvia Caddy.
+# Il certificato HTTPS (Let's Encrypt) viene ottenuto e rinnovato da Caddy.
+
+http://civicalerts.it, http://www.civicalerts.it {
+	redir https://civicalerts.it{uri} permanent
+}
+
+https://www.civicalerts.it {
+	redir https://civicalerts.it{uri} permanent
+}
+
+https://civicalerts.it {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+	root * /srv/sito
+	try_files {path} {path}/ /index.html
+	file_server
+}
