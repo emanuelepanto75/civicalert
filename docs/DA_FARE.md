@@ -37,8 +37,10 @@ Elenco delle attività decise: prima quelle ancora da fare, in fondo quelle già
             vale anche per le copie fuori dal server.
       - Già a posto: nessun font esterno (solo font di sistema), un solo cookie tecnico di sessione dopo
         l'accesso (nessun banner necessario), cancellazione dell'account dal profilo funzionante.
-- [ ] **Avviso "versione di prova"** nell'app, nella schermata finale e nell'email di ricevuta, attivo finché
-      `PEC_OVERRIDE_TO` è impostato: le segnalazioni non arrivano ai Comuni.
+- [ ] **Avvio reale (19/10/2026)**: ultima prova completa con `PEC_OVERRIDE_TO` ancora attivo, poi cancellare
+      utenti e segnalazioni di prova, togliere `PEC_OVERRIDE_TO` dal `.env` e `docker compose up -d`.
+      Da quel momento le segnalazioni approvate dall'amministratore arrivano davvero ai Comuni
+      (l'avviso "versione di prova" non serve più).
 - [ ] **Indirizzo internet di casa che cambia** (TIM): passare la gestione DNS a Cloudflare con aggiornamento
       automatico, oppure usare il tunnel Cloudflare. Nel frattempo l'app avvisa via email/WhatsApp.
 
