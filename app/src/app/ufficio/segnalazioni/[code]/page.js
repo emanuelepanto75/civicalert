@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db';
 import { mediaUrl } from '@/lib/media';
 import { OFFICE_STATUS, findScopedReport, requireStaffPage } from '@/lib/office';
 import ApprovalActions from '@/components/office/ApprovalActions';
+import DeleteReport from '@/components/office/DeleteReport';
 import StatusPanel from './StatusPanel';
 import NoteForm from './NoteForm';
 
@@ -133,6 +134,9 @@ export default async function OfficeReportPage({ params }) {
             </div>
           ) : (
             <StatusPanel code={report.code} status={report.status} hasCitizen={Boolean(report.user)} />
+          )}
+          {user.role === 'ADMIN' && (
+            <DeleteReport code={report.code} sent={report.deliveries.some((d) => d.status === 'SENT')} />
           )}
           <div className="panel">
             <h2>Storico</h2>

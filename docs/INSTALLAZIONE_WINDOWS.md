@@ -208,6 +208,8 @@ Nel menu in alto, oltre al Cruscotto:
 - **Comuni**: ricerca fra tutti i comuni, correzione dell'indirizzo PEC e attivazione/disattivazione dell'invio; gli invii non riusciti passano al nuovo indirizzo.
 - **Operatori**: crea gli account dei Comuni, blocca/sblocca, nuova password, elimina.
 - **Invii PEC**: tutti gli invii con l'errore restituito dal server di posta e il pulsante **Riprova**.
+- **Eliminare una segnalazione** (prove, abusi): aprila dal cruscotto e premi **Elimina segnalazione** in fondo a destra.
+  Cancella foto e storico; una PEC già inviata al Comune non si può ritirare.
 
 **Dati dimostrativi (per presentazioni)**
 ```powershell
