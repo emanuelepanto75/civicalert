@@ -9,6 +9,7 @@ import { MediaError, deleteMedia, saveMedia } from '@/lib/media';
 import { reportSchema } from '@/lib/reportInput';
 import { sendReceiptEmail } from '@/lib/emails';
 import { approvalRequired } from '@/lib/settings';
+import { notifyAdmin } from '@/lib/adminNotify';
 import { authenticityFlags, findSameProblem, newReportCode, publicReport, reportsLeftToday } from '@/lib/reports';
 
 export const dynamic = 'force-dynamic';
@@ -129,6 +130,14 @@ export async function POST(request) {
       sameProblem: (sameProblem?.count ?? 0) + 1,
       siteUrl: baseUrl(request),
     }).catch((e) => console.error('[ricevuta]', e.message));
+    if (review) {
+      notifyAdmin(
+        `CivicAlerts: nuova segnalazione da approvare (${saved.code})`,
+        `${saved.category.name} – ${saved.municipality?.name || 'Comune non identificato'}\n` +
+          `${saved.address || ''}\n\nApprova o non approvare: ${baseUrl(request)}/ufficio/approvazioni`,
+        'approvazione',
+      ).catch((e) => console.error('[approvazione]', e.message));
+    }
     return NextResponse.json(
       { report: publicReport(saved, { includeOwner: true, viewerId: user.id }), routed: Boolean(pecTo), review },
       { status: 201 },

@@ -1,6 +1,6 @@
 import { Resolver } from 'node:dns/promises';
 import { config } from './config';
-import { sendMail } from './mailer';
+import { notifyAdmin } from './adminNotify';
 
 // Server di casa con IP dinamico: controlla periodicamente che il DNS del dominio
 // punti ancora all'indirizzo internet attuale e, se no, avvisa l'amministratore
@@ -41,24 +41,8 @@ async function dnsIps(host) {
   }
 }
 
-async function notify(subject, text) {
-  const { email, whatsapp } = config.ipWatch;
-  if (email) {
-    await sendMail({ to: email, subject, text }).catch((err) =>
-      console.error('[controllo ip] email non inviata:', err.message),
-    );
-  }
-  if (whatsapp.phone && whatsapp.apiKey) {
-    const url = new URL('https://api.callmebot.com/whatsapp.php');
-    url.searchParams.set('phone', whatsapp.phone);
-    url.searchParams.set('apikey', whatsapp.apiKey);
-    url.searchParams.set('text', `${subject}\n\n${text}`);
-    await fetch(url, { signal: AbortSignal.timeout(20_000) })
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      })
-      .catch((err) => console.error('[controllo ip] WhatsApp non inviato:', err.message));
-  }
+function notify(subject, text) {
+  return notifyAdmin(subject, text, 'controllo ip');
 }
 
 export async function checkPublicIp() {

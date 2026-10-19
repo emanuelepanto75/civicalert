@@ -84,6 +84,15 @@
 
   .contact { text-align: center; }
   .contact .btn { margin-top: 22px; }
+  .nav .right { display: flex; align-items: center; gap: 18px; }
+  .nav a.app { background: var(--accent); color: #fff; text-decoration: none; font-weight: 700; font-size: 15px; padding: 8px 14px; border-radius: 10px; }
+  .note { margin-top: 18px; font-size: 14px; color: #c7d7ee; max-width: 560px; }
+  .contact .btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .contact .btn.outline { border: 1px solid var(--border); color: var(--navy); background: #fff; }
+  .contact .small { margin-top: 18px; font-size: 14px; color: var(--muted); }
+  footer a { color: inherit; }
+  .nav a.app { white-space: nowrap; }
+  @media (max-width: 480px) { .nav a.link { display: none; } }
 
   footer { border-top: 1px solid var(--border); padding: 28px 0; color: var(--muted); font-size: 14px; }
   footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
@@ -102,20 +111,24 @@
 <header>
   <div class="wrap nav">
     <a class="logo" href="#"><img src="icon-192.png" alt=""> <b>Civic<span>Alerts</span></b></a>
-    <a class="link" href="#contatti">Contatti</a>
+    <div class="right">
+      <a class="link" href="#contatti">Contatti</a>
+      <a class="app" href="https://app.civicalerts.it">Apri l’app</a>
+    </div>
   </div>
 </header>
 
 <div class="hero">
   <div class="wrap">
     <div>
-      <span class="badge">Presto disponibile</span>
+      <span class="badge">Fase di avvio</span>
       <h1>Segnala un problema al tuo Comune. In meno di un minuto.</h1>
       <p class="lead">Buche, lampioni spenti, rifiuti abbandonati: scatti una foto, il telefono rileva la posizione e CivicAlerts invia la segnalazione al Comune competente <strong>via PEC</strong>, con ricevuta di consegna.</p>
       <div class="cta">
-        <a class="btn primary" href="#come-funziona">Come funziona</a>
-        <a class="btn ghost" href="#comuni">Sei un Comune?</a>
+        <a class="btn primary" href="https://app.civicalerts.it">Segnala ora →</a>
+        <a class="btn ghost" href="#come-funziona">Come funziona</a>
       </div>
+      <p class="note">In questa prima fase ogni segnalazione viene controllata prima dell’invio al Comune.</p>
     </div>
     <div class="phone" aria-hidden="true">
       <div class="screen">
@@ -138,7 +151,7 @@
     <p class="sub">Nessuna app da scaricare: CivicAlerts si apre dal browser e si aggiunge alla schermata Home del telefono.</p>
     <div class="steps">
       <div class="step"><div class="num">1</div><h3>Fotografa</h3><p>Scatta una foto o un breve video del problema.</p></div>
-      <div class="step"><div class="num">2</div><h3>Scegli la categoria</h3><p>Buca, rifiuti, illuminazione, incidente… La posizione la rileva il GPS del telefono.</p></div>
+      <div class="step"><div class="num">2</div><h3>Scegli la categoria</h3><p>Buca, rifiuti, illuminazione, segnaletica… La posizione la rileva il GPS del telefono.</p></div>
       <div class="step"><div class="num">3</div><h3>Invia</h3><p>CivicAlerts trova il Comune competente e gli invia una PEC con foto, posizione e descrizione. Tu ricevi il numero della segnalazione.</p></div>
     </div>
   </div>
@@ -177,7 +190,7 @@
       </div>
       <ul>
         <li>Foto, posizione GPS e indirizzo in ogni segnalazione</li>
-        <li>Niente duplicati: lo stesso problema non arriva due volte</li>
+        <li>Lo stesso problema segnalato da più cittadini è indicato e collegato alla prima segnalazione</li>
         <li>Cruscotto con mappa, stati e risposta al cittadino</li>
       </ul>
     </div>
@@ -188,14 +201,19 @@
   <div class="wrap">
     <h2>Vuoi saperne di più?</h2>
     <p class="sub" style="margin-left:auto;margin-right:auto">Cittadini, Comuni, associazioni: scrivici per informazioni o per partecipare alla sperimentazione.</p>
-    <a class="btn primary" href="mailto:info@civicalerts.it">info@civicalerts.it</a>
+    <div class="btns">
+      <a class="btn primary" href="https://www.facebook.com/profile.php?id=61595393549393" target="_blank" rel="noopener">Scrivici su Facebook</a>
+      <a class="btn outline" href="https://app.civicalerts.it">Apri l’app</a>
+    </div>
+    <p class="small">Uffici comunali: <a href="mailto:civicalerts@pec.it">civicalerts@pec.it</a> (PEC)</p>
   </div>
 </section>
 
 <footer>
   <div class="wrap">
     <span>© 2026 CivicAlerts</span>
-    <span>Questo sito non usa cookie e non raccoglie dati personali. Privacy: <a href="mailto:privacy@civicalerts.it">privacy@civicalerts.it</a></span>
+    <span><a href="https://www.facebook.com/profile.php?id=61595393549393" target="_blank" rel="noopener">Facebook</a> · <a href="https://app.civicalerts.it/privacy">Informativa privacy dell’app</a></span>
+    <span>Questo sito non usa cookie e non raccoglie dati personali.</span>
   </div>
 </footer>
 
