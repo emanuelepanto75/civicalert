@@ -52,6 +52,8 @@ services:
       TITOLARE_NOME: ${TITOLARE_NOME:-}
       TITOLARE_INDIRIZZO: ${TITOLARE_INDIRIZZO:-}
       PRIVACY_EMAIL: ${PRIVACY_EMAIL:-info@civicalerts.it}
+      DPO_NOME: ${DPO_NOME:-}
+      DPO_EMAIL: ${DPO_EMAIL:-dpo@civicalerts.it}
       # Avviso se l'indirizzo internet di casa cambia (vedi .env.example)
       ALERT_EMAIL: ${ALERT_EMAIL:-}
       ALERT_WHATSAPP_PHONE: ${ALERT_WHATSAPP_PHONE:-}

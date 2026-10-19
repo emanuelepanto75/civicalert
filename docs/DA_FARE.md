@@ -27,16 +27,16 @@ Elenco delle attività decise: prima quelle ancora da fare, in fondo quelle già
 
 ## Prima di allargare le prove
 
-- [ ] **Informativa privacy definitiva**: revisione del legale (bozza pronta), poi inserimento nella pagina Privacy.
-      Da includere nella versione definitiva (verifica del 15/10/2026):
-      - [ ] **Età minima**: chiedere al legale se tenere 14 anni o alzare a 18 (base giuridica = servizio richiesto,
-            nome e telefono arrivano al Comune via PEC). Oggi: casella obbligatoria "almeno 14 anni".
-      - [ ] **Mappa**: il browser di chi guarda la mappa scarica le tessere dai server di OpenStreetMap (UK),
-            che ricevono l'indirizzo IP; oggi l'informativa cita OSM solo per la ricerca indirizzi.
-      - [ ] **Backup**: le copie di sicurezza notturne si conservano 30 giorni (anche dopo una cancellazione);
-            vale anche per le copie fuori dal server.
-      - Già a posto: nessun font esterno (solo font di sistema), un solo cookie tecnico di sessione dopo
-        l'accesso (nessun banner necessario), cancellazione dell'account dal profilo funzionante.
+- [x] **Informativa privacy definitiva** (testo del legale) inserita nella pagina Privacy e cookie il 19/10/2026:
+      età minima 18 anni, DPO, tabella delle basi giuridiche e del cookie, testi brevi nelle schermate,
+      "Togli dalla mappa pubblica" per l'amministratore.
+- [ ] **Caselle info@civicalerts.it e dpo@civicalerts.it su Aruba**: l'informativa le indica per l'esercizio
+      dei diritti; vanno create (o inoltrate alla tua casella) prima che arrivino richieste.
+- [ ] **Nel `.env`**: `TITOLARE_NOME` (e `TITOLARE_INDIRIZZO` se vuoi), `DPO_NOME`, poi `docker compose up -d`.
+- [ ] **Log tecnici al massimo 6 mesi** (promesso dall'informativa): oggi i registri dei contenitori ruotano per
+      dimensione (5 file da 10 MB); aggiungere una pulizia periodica, ad es. `docker compose up -d --force-recreate`
+      una volta al mese nell'attività pianificata.
+- [ ] **Backup 30 giorni**: l'informativa definitiva non lo cita; chiedere al legale se aggiungerlo.
 - [ ] **Avvio reale (19/10/2026)**: ultima prova completa con `PEC_OVERRIDE_TO` ancora attivo, poi cancellare
       utenti e segnalazioni di prova, togliere `PEC_OVERRIDE_TO` dal `.env` e `docker compose up -d`.
       Da quel momento le segnalazioni approvate dall'amministratore arrivano davvero ai Comuni

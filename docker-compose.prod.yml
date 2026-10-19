@@ -51,6 +51,8 @@ services:
       TITOLARE_NOME: ${TITOLARE_NOME:-}
       TITOLARE_INDIRIZZO: ${TITOLARE_INDIRIZZO:-}
       PRIVACY_EMAIL: ${PRIVACY_EMAIL:-info@civicalerts.it}
+      DPO_NOME: ${DPO_NOME:-}
+      DPO_EMAIL: ${DPO_EMAIL:-dpo@civicalerts.it}
       MAX_GPS_ACCURACY_M: ${MAX_GPS_ACCURACY_M:-200}
       MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-50}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}

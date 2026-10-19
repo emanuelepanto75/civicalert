@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
 import { prisma } from '@/lib/db';
+import { config } from '@/lib/config';
 import { STATUS_LABELS, publicReport } from '@/lib/reports';
 import ResolveButton from './ResolveButton';
 
@@ -26,7 +27,7 @@ export default async function ReportDetailPage({ params }) {
   const user = await getCurrentUser();
   const isOwner = Boolean(user && raw.userId === user.id);
   // In verifica: la vede solo chi l'ha fatta
-  if (raw.status === 'REVIEW' && !isOwner) notFound();
+  if ((raw.status === 'REVIEW' || raw.hiddenFromPublic) && !isOwner) notFound();
   const r = publicReport(raw, { includeOwner: isOwner, viewerId: user?.id });
   const open = !['RESOLVED', 'REJECTED'].includes(r.status);
 
@@ -115,6 +116,14 @@ export default async function ReportDetailPage({ params }) {
       )}
 
       {isOwner && open && <ResolveButton code={r.code} />}
+
+      {isOwner && r.status !== 'REVIEW' && (
+        <p className="muted small">
+          {raw.hiddenFromPublic
+            ? 'Questa segnalazione non compare sulla mappa e nell’elenco pubblici; resta inviata al Comune.'
+            : <>Non vuoi che questa segnalazione compaia sulla mappa pubblica? Chiedi di toglierla scrivendo a <a href={`mailto:${config.privacy.email}`}>{config.privacy.email}</a>.</>}
+        </p>
+      )}
     </div>
   );
 }

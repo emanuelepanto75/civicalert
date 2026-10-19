@@ -114,6 +114,8 @@ model Report {
   duplicates      Report[]      @relation("Duplicates")
   // Promemoria al cittadino ("il problema è stato risolto?") già inviato
   reminderSentAt  DateTime?     @map("reminder_sent_at")
+  // Tolta dalla mappa e dall'elenco pubblici (opposizione del cittadino, dati di terzi…): resta inviata al Comune
+  hiddenFromPublic Boolean      @default(false) @map("hidden_from_public")
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
 

@@ -136,7 +136,7 @@ export default async function OfficeReportPage({ params }) {
             <StatusPanel code={report.code} status={report.status} hasCitizen={Boolean(report.user)} />
           )}
           {user.role === 'ADMIN' && (
-            <DeleteReport code={report.code} sent={report.deliveries.some((d) => d.status === 'SENT')} />
+            <DeleteReport code={report.code} sent={report.deliveries.some((d) => d.status === 'SENT')} hidden={report.hiddenFromPublic} />
           )}
           <div className="panel">
             <h2>Storico</h2>

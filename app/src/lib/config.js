@@ -36,6 +36,9 @@ export const config = {
     owner: process.env.TITOLARE_NOME || '',
     address: process.env.TITOLARE_INDIRIZZO || '',
     email: process.env.PRIVACY_EMAIL || 'info@civicalerts.it',
+    // Responsabile della protezione dei dati (facoltativo)
+    dpoName: process.env.DPO_NOME || '',
+    dpoEmail: process.env.DPO_EMAIL || 'dpo@civicalerts.it',
   },
   // Conservazione dei dati (vedi informativa): cancellazione automatica
   retention: {

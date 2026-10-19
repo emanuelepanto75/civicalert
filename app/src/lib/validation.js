@@ -20,7 +20,7 @@ export const registerSchema = z.object({
     .trim()
     .regex(/^\+?[0-9 ]{6,20}$/, { error: 'Numero di telefono non valido' }),
   password: passwordSchema,
-  privacy: z.literal(true, { error: "Conferma di avere almeno 14 anni e di aver letto l'informativa privacy" }),
+  privacy: z.literal(true, { error: "Conferma di avere almeno 18 anni e di aver letto l'informativa privacy" }),
 });
 
 export const loginSchema = z.object({

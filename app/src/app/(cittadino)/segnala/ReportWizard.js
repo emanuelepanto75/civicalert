@@ -94,6 +94,7 @@ function PhotoStep({ file, preview, setFile, onNext }) {
       <div>
         <h1>Aggiungi una foto</h1>
         <p className="muted">Documenta il problema con un’immagine chiara o un breve video.</p>
+        <p className="muted small" style={{ marginTop: 6 }}>Foto e descrizione saranno pubbliche: inquadra solo il problema, senza volti, targhe o nomi.</p>
       </div>
 
       {file ? (
@@ -272,7 +273,7 @@ function ReviewStep({ file, preview, category, description, geo, review, onBack,
       {review && <ReviewNotice />}
       <div className="alert info small">
         🛡️ La segnalazione sarà inviata al Comune tramite <strong>PEC</strong>, con ricevuta di consegna legalmente valida.
-        Al Comune verranno comunicati nome, email e telefono; sulla mappa pubblica no.
+        Al Comune verranno comunicati nome, cognome, email e telefono; sulla mappa pubblica no.
       </div>
 
       <div className="row">

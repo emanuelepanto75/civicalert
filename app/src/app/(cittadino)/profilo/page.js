@@ -23,7 +23,7 @@ export default async function ProfilePage() {
       <LogoutButton />
       {user.role === 'CITIZEN' && <DeleteAccount />}
       <p className="muted small center">
-        <Link href="/privacy">Informativa privacy</Link>
+        <Link href="/privacy">Privacy e cookie</Link>
       </p>
     </div>
   );

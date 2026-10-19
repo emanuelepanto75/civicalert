@@ -20,7 +20,7 @@ export async function GET() {
   const reports = await prisma.report.findMany({
     // Lo stesso problema segnalato da più cittadini compare una volta sola
     // Le segnalazioni in verifica compaiono solo dopo l'approvazione
-    where: { createdAt: { gte: since }, status: { notIn: ['REJECTED', 'REVIEW'] }, duplicateOfId: null },
+    where: { createdAt: { gte: since }, status: { notIn: ['REJECTED', 'REVIEW'] }, duplicateOfId: null, hiddenFromPublic: false },
     orderBy: { createdAt: 'desc' },
     take: 1000,
     include: { category: true, municipality: true },
