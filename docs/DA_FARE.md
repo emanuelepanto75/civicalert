@@ -1,6 +1,6 @@
 # CivicAlerts – cose da fare
 
-Elenco delle attività decise: prima quelle ancora da fare, in fondo quelle già fatte. Aggiornato il 15/10/2026.
+Elenco delle attività decise: prima quelle ancora da fare, in fondo quelle già fatte. Aggiornato il 19/10/2026.
 
 ## Da fare sul server di casa
 
@@ -19,6 +19,11 @@ Elenco delle attività decise: prima quelle ancora da fare, in fondo quelle già
       - [ ] BIOS: "Restore on AC Power Loss" su Power On
       - [ ] Prova finale: riavvio senza toccare nulla, app raggiungibile dopo 5 minuti
 - [ ] **Cambiare la password della casella PEC** su Aruba (è stata scritta in chat) e aggiornarla nel `.env`.
+- [ ] **DNS Aruba, un solo record SPF**: oggi ce ne sono due (`v=spf1 include:_spf.aruba.it ~all` e
+      `v=spf1 include:spf.aruba.it ~all`); con due le email di noreply@civicalerts.it possono finire nello spam.
+      Cancellare quello con `spf.aruba.it` (senza trattino basso) e tenere `_spf.aruba.it`.
+- [ ] **Verifica del dominio su Meta**: record TXT `facebook-domain-verification=…` aggiunto su Aruba il 19/10/2026;
+      quando è visibile premere "Verifica dominio" in Business Suite › Sicurezza del brand › Domini.
 
 ## Prima di allargare le prove
 
