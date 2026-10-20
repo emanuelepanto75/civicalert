@@ -30,8 +30,7 @@ Elenco delle attività decise: prima quelle ancora da fare, in fondo quelle già
 - [x] **Informativa privacy definitiva** (testo del legale) inserita nella pagina Privacy e cookie il 19/10/2026:
       età minima 18 anni, DPO, tabella delle basi giuridiche e del cookie, testi brevi nelle schermate,
       "Togli dalla mappa pubblica" per l'amministratore.
-- [ ] **Caselle info@civicalerts.it e dpo@civicalerts.it su Aruba**: l'informativa le indica per l'esercizio
-      dei diritti; vanno create (o inoltrate alla tua casella) prima che arrivino richieste.
+- [x] **Caselle info@civicalerts.it e dpo@civicalerts.it** create su Aruba (20/10/2026).
 - [ ] **Nel `.env`**: `TITOLARE_NOME` (e `TITOLARE_INDIRIZZO` se vuoi), `DPO_NOME`, poi `docker compose up -d`.
 - [ ] **Log tecnici al massimo 6 mesi** (promesso dall'informativa): oggi i registri dei contenitori ruotano per
       dimensione (5 file da 10 MB); aggiungere una pulizia periodica, ad es. `docker compose up -d --force-recreate`
