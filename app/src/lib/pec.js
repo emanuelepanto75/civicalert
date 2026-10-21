@@ -112,7 +112,7 @@ export function buildReportPec({ report, siteUrl, repeat = null }) {
 /**
  * Invia la PEC di segnalazione al comune. Il mittente è la casella della
  * piattaforma (una PEC può partire solo da una casella PEC); i dati del
- * cittadino sono nel testo e la sua email è impostata come "Rispondi a".
+ * cittadino sono nel testo e "Rispondi a" è il cittadino più la casella PEC della piattaforma.
  */
 export async function sendReportPec({ report, recipient, siteUrl, repeat = null }) {
   const { subject, html, text, attachments, replyTo } = buildReportPec({ report, siteUrl, repeat });
