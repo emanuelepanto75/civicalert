@@ -1,11 +1,11 @@
 # CivicAlerts – cose da fare
 
-Elenco delle attività decise: prima quelle ancora da fare, in fondo quelle già fatte. Aggiornato il 19/10/2026.
+Elenco delle attività decise: prima quelle ancora da fare, in fondo quelle già fatte. Aggiornato il 21/10/2026.
 
 ## Da fare sul server di casa
 
-- [ ] **Aggiornare l'app** con le ultime novità (approvazione, nota nella PEC, avviso cambio indirizzo):
-      `git pull` e `docker compose up -d --build`.
+- [ ] **Aggiornare l'app** con le ultime novità (lettura della casella PEC e protocollo):
+      `git pull`, aggiungere `PEC_IMAP_HOST=imaps.pec.aruba.it` al `.env`, poi `docker compose up -d --build`.
 - [ ] **Completare il `.env`**:
       - `PUBLIC_URL=https://app.civicalerts.it`
       - `TITOLARE_NOME` e `TITOLARE_INDIRIZZO` (informativa privacy)
@@ -64,8 +64,6 @@ Elenco delle attività decise: prima quelle ancora da fare, in fondo quelle già
       impostabile dalla pagina Comuni della dashboard.
 - [ ] **Post periodici sulla pagina Facebook** con i numeri del mese, in tono positivo verso i Comuni che
       rispondono. Niente pubblicazione automatica di ogni segnalazione con tag alle autorità.
-- [ ] **Lettura automatica delle risposte** dei Comuni che arrivano su `civicalerts@pec.it`, collegate alla
-      segnalazione tramite il codice nell'oggetto.
 - [ ] **Registrazione con SPID / CIE** (tramite soggetto aggregatore) e verifica del telefono con SMS.
 - [ ] **Fornitore delle mappe** per il lancio pubblico: i server di OpenStreetMap non vanno usati per app con
       molto traffico (regole d'uso OSM); scegliere un servizio di tessere (o ospitarle) e aggiornare l'informativa.
@@ -75,6 +73,8 @@ Elenco delle attività decise: prima quelle ancora da fare, in fondo quelle già
 
 | Data | Cosa |
 |---|---|
+| 21/10/2026 | **Lettura automatica della casella PEC**: ricevute di consegna, risposte dei Comuni collegate alla segnalazione e numero di protocollo inserito da solo (o a mano con "Protocollo del Comune"); `civicalerts@pec.it` in copia nelle risposte |
+| 21/10/2026 | Anteprima e modifica della PEC prima dell'approvazione; scelta fra posizione della foto e posizione attuale |
 | 13/10/2026 | **Nota nella PEC al Comune** "Perché ricevete questa PEC": richiesta di indirizzi, WhatsApp o gestori specifici da comunicare a `civicalerts@pec.it` |
 | 13/10/2026 | **Approvazione dell'amministratore prima dell'invio**: pagina Ufficio › Da approvare con interruttore, Approva e invia la PEC / Non approvare con motivo, nota per il cittadino durante la segnalazione, nella ricevuta e nella pagina |
 | 13/10/2026 | **Avviso via email/WhatsApp** quando l'indirizzo internet di casa cambia e il DNS non è aggiornato |

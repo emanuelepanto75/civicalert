@@ -213,6 +213,12 @@ Nel menu in alto, oltre al Cruscotto:
 - **Invii PEC**: tutti gli invii con l'errore restituito dal server di posta e il pulsante **Riprova**.
 - **Eliminare una segnalazione** (prove, abusi): aprila dal cruscotto e premi **Elimina segnalazione** in fondo a destra.
   Cancella foto e storico; una PEC già inviata al Comune non si può ritirare.
+- **Risposte dei Comuni e protocollo**: la PEC al Comune ha come "Rispondi a" sia il cittadino sia
+  `civicalerts@pec.it`. Con `PEC_IMAP_HOST=imaps.pec.aruba.it` nel `.env` l'app legge la casella PEC ogni 5 minuti
+  (senza segnare nulla come letto): la ricevuta di consegna compare negli invii, le risposte del Comune finiscono
+  nel riquadro **PEC ricevute dal Comune** della segnalazione e il numero di protocollo, se presente nel testo,
+  viene inserito da solo (lo vede anche il cittadino). Ricevi un avviso via email/WhatsApp a ogni risposta.
+  Se il protocollo arriva per altre vie (es. all'email del cittadino) usa **Protocollo del Comune › Inserisci**.
 
 **Dati dimostrativi (per presentazioni)**
 ```powershell

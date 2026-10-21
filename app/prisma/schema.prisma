@@ -122,11 +122,15 @@ model Report {
   pecNote         String?       @map("pec_note")
   // Da dove viene la posizione: PHOTO = GPS della foto (luogo dello scatto), DEVICE = telefono all'invio
   locationSource  String        @default("DEVICE") @map("location_source")
+  // Numero di protocollo assegnato dal Comune (letto dalle PEC di risposta o inserito a mano)
+  protocolNumber  String?       @map("protocol_number")
+  protocolDate    String?       @map("protocol_date")
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
 
   deliveries Delivery[]
   events     ReportEvent[]
+  inbound    InboundMessage[]
 
   @@index([categoryId, status])
   @@index([municipalityId, status])
@@ -167,6 +171,8 @@ model Delivery {
   messageId     String?        @map("message_id")
   lastError     String?        @map("last_error")
   sentAt        DateTime?      @map("sent_at")
+  // Ricevuta PEC di avvenuta consegna nella casella del Comune
+  deliveredAt   DateTime?      @map("delivered_at")
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
 
@@ -210,4 +216,21 @@ model Setting {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("settings")
+}
+
+// PEC ricevute su civicalerts@pec.it e collegate a una segnalazione (risposte, protocollazioni)
+model InboundMessage {
+  id             String   @id @default(uuid())
+  messageId      String   @unique @map("message_id")
+  reportId       String?  @map("report_id")
+  report         Report?  @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  fromAddress    String?  @map("from_address")
+  subject        String?
+  text           String?
+  protocolNumber String?  @map("protocol_number")
+  receivedAt     DateTime @map("received_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@index([reportId, receivedAt])
+  @@map("inbound_messages")
 }

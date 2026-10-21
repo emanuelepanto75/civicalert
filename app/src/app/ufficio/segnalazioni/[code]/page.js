@@ -6,6 +6,7 @@ import { OFFICE_STATUS, findScopedReport, requireStaffPage } from '@/lib/office'
 import ApprovalActions from '@/components/office/ApprovalActions';
 import DeleteReport from '@/components/office/DeleteReport';
 import PecEditor from '@/components/office/PecEditor';
+import ProtocolEdit from '@/components/office/ProtocolEdit';
 import { pecRecipientFor } from '@/lib/approval';
 import StatusPanel from './StatusPanel';
 import NoteForm from './NoteForm';
@@ -25,6 +26,7 @@ export default async function OfficeReportPage({ params }) {
   const user = await requireStaffPage(`/ufficio/segnalazioni/${code}`);
   const report = await findScopedReport(user, code);
   if (!report) notFound();
+  const inbound = await prisma.inboundMessage.findMany({ where: { reportId: report.id }, orderBy: { receivedAt: 'desc' } });
   const events = await prisma.reportEvent.findMany({
     where: { reportId: report.id },
     orderBy: { createdAt: 'desc' },
@@ -110,6 +112,8 @@ export default async function OfficeReportPage({ params }) {
                   </>
                 ) : 'utente rimosso'}
               </dd>
+              <dt>Protocollo del Comune</dt>
+              <dd><ProtocolEdit code={report.code} number={report.protocolNumber} date={report.protocolDate} /></dd>
               <dt>Invio PEC</dt>
               <dd>
                 {report.deliveries.length === 0
@@ -119,6 +123,8 @@ export default async function OfficeReportPage({ params }) {
                   : report.deliveries.map((d) => (
                       <div key={d.id}>
                         {d.status === 'SENT' ? `✅ Inviata il ${fmt(d.sentAt)}` : d.status === 'FAILED' ? '❌ Invio non riuscito' : '⏳ In invio'} a {d.recipient}
+                        {d.deliveredAt && <div className="muted">📬 Consegnata nella casella del Comune il {fmt(d.deliveredAt)} (ricevuta PEC)</div>}
+                        {d.status === 'SENT' && d.lastError && <div style={{ color: '#991b1b' }}>⚠️ {d.lastError}</div>}
                       </div>
                     ))}
               </dd>
@@ -132,6 +138,21 @@ export default async function OfficeReportPage({ params }) {
               </div>
             )}
           </div>
+          {inbound.length > 0 && (
+            <div className="panel">
+              <h2>PEC ricevute dal Comune</h2>
+              {inbound.map((m) => (
+                <details key={m.id} style={{ borderTop: '1px solid var(--border)', padding: '10px 0' }}>
+                  <summary style={{ cursor: 'pointer' }}>
+                    <strong>{fmt(m.receivedAt)}</strong> · {m.fromAddress || 'mittente sconosciuto'}
+                    {m.protocolNumber && <> · <span className="badge SENT">prot. {m.protocolNumber}</span></>}
+                    <div className="muted small">{m.subject}</div>
+                  </summary>
+                  <div style={{ whiteSpace: 'pre-wrap', fontSize: 13, marginTop: 8, maxHeight: 360, overflow: 'auto' }}>{m.text}</div>
+                </details>
+              ))}
+            </div>
+          )}
           {user.role === 'ADMIN' && <PecEditor code={report.code} />}
         </div>
 

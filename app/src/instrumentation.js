@@ -16,6 +16,14 @@ export async function register() {
   const retain = () => processRetention().catch((err) => console.error('[conservazione]', err));
   setTimeout(retain, 300_000).unref();
   setInterval(retain, 86_400_000).unref();
+  // Casella PEC: ricevute di consegna e risposte dei Comuni (numero di protocollo)
+  const { pecInboxEnabled, checkPecInbox } = await import('./lib/pecInbox');
+  if (pecInboxEnabled()) {
+    const { config: cfg } = await import('./lib/config');
+    const read = () => checkPecInbox().catch((err) => console.error('[pec in arrivo]', err.message));
+    setTimeout(read, 60_000).unref();
+    setInterval(read, cfg.pecImap.minutes * 60_000).unref();
+  }
   // Server di casa: avviso se l'indirizzo internet cambia e il DNS non è aggiornato
   const { ipWatchEnabled, checkPublicIp } = await import('./lib/ipwatch');
   if (ipWatchEnabled()) {

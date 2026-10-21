@@ -64,6 +64,15 @@ export const config = {
     user: process.env.PEC_SMTP_HOST ? process.env.PEC_SMTP_USER || '' : process.env.SMTP_USER || '',
     pass: process.env.PEC_SMTP_HOST ? process.env.PEC_SMTP_PASS || '' : process.env.SMTP_PASS || '',
   },
+  // Lettura della casella PEC (risposte dei Comuni, ricevute): stesse credenziali dell'invio
+  pecImap: {
+    host: process.env.PEC_IMAP_HOST || '',
+    port: int(process.env.PEC_IMAP_PORT, 993),
+    secure: process.env.PEC_IMAP_SECURE ? process.env.PEC_IMAP_SECURE !== 'false' : int(process.env.PEC_IMAP_PORT, 993) === 993,
+    user: process.env.PEC_IMAP_USER || process.env.PEC_SMTP_USER || '',
+    pass: process.env.PEC_IMAP_PASS || process.env.PEC_SMTP_PASS || '',
+    minutes: int(process.env.PEC_INBOX_MINUTES, 5),
+  },
   pecFrom: process.env.PEC_FROM || process.env.MAIL_FROM || 'CivicAlerts <segnalazioni@civicalert.local>',
   // Se impostato, TUTTE le PEC vengono dirottate qui invece che ai comuni (utile nei test).
   pecOverrideTo: process.env.PEC_OVERRIDE_TO || '',

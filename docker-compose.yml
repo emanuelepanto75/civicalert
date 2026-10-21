@@ -77,6 +77,11 @@ services:
       PEC_SMTP_PASS: ${PEC_SMTP_PASS:-}
       PEC_FROM: ${PEC_FROM:-}
       PEC_OVERRIDE_TO: ${PEC_OVERRIDE_TO:-}
+      # Lettura della casella PEC (ricevute di consegna e risposte dei Comuni con il protocollo).
+      # Utente e password sono quelli di PEC_SMTP_*; vuoto = lettura spenta
+      PEC_IMAP_HOST: ${PEC_IMAP_HOST:-}
+      PEC_IMAP_PORT: ${PEC_IMAP_PORT:-993}
+      PEC_INBOX_MINUTES: ${PEC_INBOX_MINUTES:-5}
       NOMINATIM_EMAIL: ${NOMINATIM_EMAIL:-}
     volumes:
       - app_data:/data # foto/video caricati + chiave delle sessioni

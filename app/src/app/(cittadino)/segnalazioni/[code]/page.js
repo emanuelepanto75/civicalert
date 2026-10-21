@@ -63,6 +63,12 @@ export default async function ReportDetailPage({ params }) {
             </div>
           )}
           {r.description && <div className="kv"><span className="k">Descrizione</span><span className="v">{r.description}</span></div>}
+          {isOwner && raw.protocolNumber && (
+            <div className="kv">
+              <span className="k">Protocollo del Comune</span>
+              <span className="v">n. {raw.protocolNumber}{raw.protocolDate ? ` del ${raw.protocolDate}` : ''}</span>
+            </div>
+          )}
           {r.resolvedAt && (
             <div className="kv">
               <span className="k">Chiusa il</span>
