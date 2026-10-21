@@ -116,6 +116,10 @@ model Report {
   reminderSentAt  DateTime?     @map("reminder_sent_at")
   // Tolta dalla mappa e dall'elenco pubblici (opposizione del cittadino, dati di terzi…): resta inviata al Comune
   hiddenFromPublic Boolean      @default(false) @map("hidden_from_public")
+  // Modifiche dell'amministratore alla PEC prima dell'approvazione (vuoto = valori normali)
+  pecRecipient    String?       @map("pec_recipient")
+  pecSubject      String?       @map("pec_subject")
+  pecNote         String?       @map("pec_note")
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
 

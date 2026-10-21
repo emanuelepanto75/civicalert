@@ -204,6 +204,9 @@ Nel menu in alto, oltre al Cruscotto:
   qui e la PEC al Comune parte solo con **Approva e invia la PEC**; **Non approvare** la chiude e manda al
   cittadino il motivo. Il pulsante in cima disattiva o riattiva l'approvazione (invio diretto al Comune).
   Gli operatori dei Comuni vedono una segnalazione solo dopo l'approvazione.
+  Nella pagina della segnalazione, il riquadro **PEC che verrà inviata al Comune** mostra l'anteprima esatta;
+  con **Modifica** si cambiano destinatario (es. un altro ufficio), oggetto, indirizzo, descrizione e si aggiunge
+  una nota per il Comune. Dopo l'approvazione la PEC non è più modificabile.
 - **Cittadini**: ricerca, ordinamento per numero di segnalazioni (aperte/risolte, clic per vederle), blocca/sblocca, elimina (a scelta anche segnalazioni e foto).
 - **Comuni**: ricerca fra tutti i comuni, correzione dell'indirizzo PEC e attivazione/disattivazione dell'invio; gli invii non riusciti passano al nuovo indirizzo.
 - **Operatori**: crea gli account dei Comuni, blocca/sblocca, nuova password, elimina.

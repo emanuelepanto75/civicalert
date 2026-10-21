@@ -5,6 +5,8 @@ import { mediaUrl } from '@/lib/media';
 import { OFFICE_STATUS, findScopedReport, requireStaffPage } from '@/lib/office';
 import ApprovalActions from '@/components/office/ApprovalActions';
 import DeleteReport from '@/components/office/DeleteReport';
+import PecEditor from '@/components/office/PecEditor';
+import { pecRecipientFor } from '@/lib/approval';
 import StatusPanel from './StatusPanel';
 import NoteForm from './NoteForm';
 
@@ -106,7 +108,9 @@ export default async function OfficeReportPage({ params }) {
               <dt>Invio PEC</dt>
               <dd>
                 {report.deliveries.length === 0
-                  ? 'Nessun invio (Comune senza PEC configurata)'
+                  ? report.status === 'REVIEW'
+                    ? 'Parte dopo l’approvazione'
+                    : 'Nessun invio (Comune senza PEC configurata)'
                   : report.deliveries.map((d) => (
                       <div key={d.id}>
                         {d.status === 'SENT' ? `✅ Inviata il ${fmt(d.sentAt)}` : d.status === 'FAILED' ? '❌ Invio non riuscito' : '⏳ In invio'} a {d.recipient}
@@ -123,6 +127,7 @@ export default async function OfficeReportPage({ params }) {
               </div>
             )}
           </div>
+          {user.role === 'ADMIN' && <PecEditor code={report.code} />}
         </div>
 
         <div className="col">
@@ -130,7 +135,7 @@ export default async function OfficeReportPage({ params }) {
             <div className="panel">
               <h2>Da approvare</h2>
               <p className="muted small">La PEC al Comune parte solo dopo l’approvazione.</p>
-              <ApprovalActions code={report.code} hasPec={Boolean(report.municipality?.notifyPec && report.municipality.pecAddress)} />
+              <ApprovalActions code={report.code} hasPec={Boolean(pecRecipientFor(report))} />
             </div>
           ) : (
             <StatusPanel code={report.code} status={report.status} hasCitizen={Boolean(report.user)} />

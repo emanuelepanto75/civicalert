@@ -2,7 +2,7 @@ import Link from 'next/link';
 import ApprovalActions from '@/components/office/ApprovalActions';
 import ApprovalToggle from '@/components/office/ApprovalToggle';
 import { requireAdminPage } from '@/lib/admin';
-import { reportsToReview } from '@/lib/approval';
+import { pecRecipientFor, reportsToReview } from '@/lib/approval';
 import { mediaUrl } from '@/lib/media';
 import { approvalRequired } from '@/lib/settings';
 
@@ -39,7 +39,7 @@ export default async function ApprovalsPage() {
 
       {reports.map((r) => {
         const media = mediaUrl(r.mediaPath);
-        const pec = r.municipality?.notifyPec ? r.municipality.pecAddress : null;
+        const pec = pecRecipientFor(r);
         return (
           <section key={r.id} className="panel" style={{ display: 'flex', gap: 18, flexWrap: 'wrap' }}>
             <div style={{ width: 260, flexShrink: 0 }}>
@@ -84,6 +84,9 @@ export default async function ApprovalsPage() {
               {r.authenticity.length > 0 && (
                 <div className="alert warn small">Da verificare: {r.authenticity.map((f) => FLAG_LABELS[f] || f).join('; ')}.</div>
               )}
+              <div>
+                <Link href={`/ufficio/segnalazioni/${r.code}`} className="small">Vedi e modifica la PEC prima di approvare →</Link>
+              </div>
               <ApprovalActions code={r.code} hasPec={Boolean(pec)} />
             </div>
           </section>

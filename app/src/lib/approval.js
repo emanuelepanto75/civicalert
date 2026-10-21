@@ -5,6 +5,11 @@ import { findSameProblem } from './reports';
 
 const include = { user: true, category: true, municipality: true, deliveries: true };
 
+/** Destinatario della PEC: quello scelto dall'amministratore o la PEC del Comune. */
+export function pecRecipientFor(report) {
+  return report.pecRecipient || (report.municipality?.notifyPec ? report.municipality.pecAddress : null);
+}
+
 /** Segnalazioni in attesa di approvazione, dalla più vecchia. */
 export function reportsToReview() {
   return prisma.report.findMany({
@@ -28,7 +33,7 @@ export async function approveReport({ report, actor, siteUrl }) {
   const sameProblem = report.duplicateOfId
     ? null
     : await findSameProblem({ ...report, userId: null, excludeId: report.id });
-  const pecTo = report.municipality?.notifyPec ? report.municipality.pecAddress : null;
+  const pecTo = pecRecipientFor(report);
 
   const updated = await prisma.report.updateMany({
     where: { id: report.id, status: 'REVIEW' },

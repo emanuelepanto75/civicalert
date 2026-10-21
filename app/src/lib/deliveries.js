@@ -6,6 +6,22 @@ const RETRY_MINUTES = [1, 5, 30]; // attesa dopo il 1°, 2°, 3° fallimento
 let running = false;
 let lastSiteUrl = ''; // per i link nelle PEC inviate dal worker periodico
 
+// Stesso problema già segnalato da altri: quante volte, compresa questa (serve
+// `duplicateOf` con id, code, createdAt).
+export async function repeatInfo(report) {
+  if (!report.duplicateOf) return null;
+  return {
+    firstCode: report.duplicateOf.code,
+    firstDate: report.duplicateOf.createdAt,
+    number: await prisma.report.count({
+      where: {
+        OR: [{ id: report.duplicateOf.id }, { duplicateOfId: report.duplicateOf.id }],
+        createdAt: { lte: report.createdAt },
+      },
+    }),
+  };
+}
+
 async function attempt(delivery, siteUrl) {
   const report = await prisma.report.findUnique({
     where: { id: delivery.reportId },
@@ -13,17 +29,7 @@ async function attempt(delivery, siteUrl) {
   });
   const attempts = delivery.attempts + 1;
   try {
-    // Stesso problema già segnalato da altri: quante volte, compresa questa
-    const repeat = report.duplicateOf && {
-      firstCode: report.duplicateOf.code,
-      firstDate: report.duplicateOf.createdAt,
-      number: await prisma.report.count({
-        where: {
-          OR: [{ id: report.duplicateOf.id }, { duplicateOfId: report.duplicateOf.id }],
-          createdAt: { lte: report.createdAt },
-        },
-      }),
-    };
+    const repeat = await repeatInfo(report);
     const messageId = await sendReportPec({ report, recipient: delivery.recipient, siteUrl, repeat });
     await prisma.$transaction([
       prisma.delivery.update({

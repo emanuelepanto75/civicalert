@@ -31,18 +31,22 @@ function formatDate(date) {
 }
 
 /**
- * Invia la PEC di segnalazione al comune. Il mittente è la casella della
- * piattaforma (una PEC può partire solo da una casella PEC); i dati del
- * cittadino sono nel testo e la sua email è impostata come "Rispondi a".
+ * Compone la PEC di segnalazione (usata per l'invio e per l'anteprima nella
+ * dashboard). Le modifiche dell'amministratore stanno sulla segnalazione:
+ * pecSubject (oggetto) e pecNote (nota per il Comune); indirizzo e descrizione
+ * sono quelli della segnalazione.
  */
-export async function sendReportPec({ report, recipient, siteUrl, repeat = null }) {
+export function buildReportPec({ report, siteUrl, repeat = null }) {
   const { user, category, municipality } = report;
   const mapsUrl = `https://www.openstreetmap.org/?mlat=${report.latitude}&mlon=${report.longitude}#map=19/${report.latitude}/${report.longitude}`;
   const detailUrl = `${siteUrl}/segnalazioni/${report.code}`;
-  const subject = `[CivicAlerts] Segnalazione ${report.code}${repeat ? ` (${repeat.number}ª dello stesso problema)` : ''} – ${category.name} – ${municipality?.name ?? ''}`;
+  const subject =
+    report.pecSubject ||
+    `[CivicAlerts] Segnalazione ${report.code}${repeat ? ` (${repeat.number}ª dello stesso problema)` : ''} – ${category.name} – ${municipality?.name ?? ''}`;
   const repeatText = repeat
     ? `Lo stesso problema è stato segnalato da ${repeat.number} cittadini diversi: questa è la segnalazione n. ${repeat.number}. Prima segnalazione: ${repeat.firstCode}, ${formatDate(repeat.firstDate)}.`
     : '';
+  const adminNote = report.pecNote?.trim() || '';
 
   const rows = [
     ['Codice segnalazione', report.code],
@@ -66,6 +70,7 @@ export async function sendReportPec({ report, recipient, siteUrl, repeat = null 
 <div style="padding:24px">
   <p>Si trasmette la seguente segnalazione inviata da un cittadino tramite la piattaforma CivicAlerts.</p>
   ${repeatText ? `<p style="background:#fff7ed;border-left:4px solid #E85D04;padding:10px 14px"><b>${escapeHtml(repeatText)}</b></p>` : ''}
+  ${adminNote ? `<p style="background:#eff6ff;border-left:4px solid #1A3A6B;padding:10px 14px;white-space:pre-wrap"><b>Nota di CivicAlerts:</b><br>${escapeHtml(adminNote)}</p>` : ''}
   <table style="border-collapse:collapse;width:100%">
     ${rows
       .map(
@@ -83,19 +88,26 @@ export async function sendReportPec({ report, recipient, siteUrl, repeat = null 
   </div>
 </div></body></html>`;
 
-  const text = (repeatText ? `${repeatText}\n\n` : '') + rows.map(([k, v]) => `${k}: ${v}`).join('\n') + `\n\nMappa: ${mapsUrl}\nDettaglio: ${detailUrl}\n` + `\n---\n${note.title.toUpperCase()}\n\n${note.paragraphs.join('\n\n')}\n`;
+  const text =
+    (repeatText ? `${repeatText}\n\n` : '') +
+    (adminNote ? `Nota di CivicAlerts: ${adminNote}\n\n` : '') +
+    rows.map(([k, v]) => `${k}: ${v}`).join('\n') +
+    `\n\nMappa: ${mapsUrl}\nDettaglio: ${detailUrl}\n` +
+    `\n---\n${note.title.toUpperCase()}\n\n${note.paragraphs.join('\n\n')}\n`;
 
   const attachments = report.mediaPath
     ? [{ filename: `${report.code}${path.extname(report.mediaPath)}`, path: path.join(config.uploadDir, report.mediaPath) }]
     : [];
+  return { subject, html, text, attachments, replyTo: user?.email };
+}
 
-  const info = await sendPec({
-    to: config.pecOverrideTo || recipient,
-    replyTo: user?.email,
-    subject,
-    html,
-    text,
-    attachments,
-  });
+/**
+ * Invia la PEC di segnalazione al comune. Il mittente è la casella della
+ * piattaforma (una PEC può partire solo da una casella PEC); i dati del
+ * cittadino sono nel testo e la sua email è impostata come "Rispondi a".
+ */
+export async function sendReportPec({ report, recipient, siteUrl, repeat = null }) {
+  const { subject, html, text, attachments, replyTo } = buildReportPec({ report, siteUrl, repeat });
+  const info = await sendPec({ to: config.pecOverrideTo || recipient, replyTo, subject, html, text, attachments });
   return info.messageId;
 }
