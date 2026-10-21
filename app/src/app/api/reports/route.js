@@ -5,7 +5,7 @@ import { processPendingDeliveries } from '@/lib/deliveries';
 import { resolveLocation } from '@/lib/geocoding';
 import { requireUser } from '@/lib/guards';
 import { baseUrl, jsonError, zodMessage } from '@/lib/http';
-import { MediaError, deleteMedia, saveMedia } from '@/lib/media';
+import { MediaError, deleteMedia, photoInfo, saveMedia } from '@/lib/media';
 import { reportSchema } from '@/lib/reportInput';
 import { sendReceiptEmail } from '@/lib/emails';
 import { approvalRequired } from '@/lib/settings';
@@ -38,11 +38,17 @@ export async function POST(request) {
   } catch {
     return jsonError('Richiesta non valida');
   }
+  // Posizione del luogo dello scatto: si usa quella scritta nella foto, non quella inviata dal telefono
+  const fromPhoto = form.get('locationSource') === 'photo';
+  const shot = fromPhoto ? await photoInfo(form.get('media')) : null;
+  if (fromPhoto && (shot.lat == null || shot.lon == null)) {
+    return jsonError('La foto non contiene la posizione dello scatto: usa la posizione attuale.', 422);
+  }
   const parsed = reportSchema.safeParse({
     categoryId: form.get('categoryId'),
-    latitude: form.get('latitude'),
-    longitude: form.get('longitude'),
-    accuracy: form.get('accuracy') || undefined,
+    latitude: fromPhoto ? shot.lat : form.get('latitude'),
+    longitude: fromPhoto ? shot.lon : form.get('longitude'),
+    accuracy: fromPhoto ? undefined : form.get('accuracy') || undefined,
     description: form.get('description') || undefined,
   });
   if (!parsed.success) return jsonError(zodMessage(parsed.error));
@@ -105,6 +111,7 @@ export async function POST(request) {
         photoGpsDistM,
         authenticity: flags,
         duplicateOfId: sameProblem?.first?.id ?? null,
+        locationSource: fromPhoto ? 'PHOTO' : 'DEVICE',
         ...(review && { status: 'REVIEW' }),
         deliveries: pecTo ? { create: { channel: 'PEC', recipient: pecTo } } : undefined,
       },

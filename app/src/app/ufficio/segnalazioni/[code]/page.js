@@ -68,6 +68,11 @@ export default async function OfficeReportPage({ params }) {
               <dd>
                 <a href={osm} target="_blank" rel="noreferrer">{report.latitude.toFixed(6)}, {report.longitude.toFixed(6)}</a>
                 {report.gpsAccuracyM != null && <span className="muted"> · precisione ±{Math.round(report.gpsAccuracyM)} m</span>}
+                <div className="muted">
+                  {report.locationSource === 'PHOTO'
+                    ? `Posizione del luogo dello scatto (GPS della foto)${report.photoTakenAt ? `, foto del ${new Date(report.photoTakenAt).toLocaleString('it-IT', { timeZone: 'UTC', dateStyle: 'medium', timeStyle: 'short' })}` : ''}`
+                    : 'Posizione del telefono al momento dell’invio'}
+                </div>
               </dd>
               <dt>Comune</dt><dd>{report.municipality?.name || 'non identificato'}</dd>
               {report.duplicateOf && (

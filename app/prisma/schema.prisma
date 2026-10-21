@@ -120,6 +120,8 @@ model Report {
   pecRecipient    String?       @map("pec_recipient")
   pecSubject      String?       @map("pec_subject")
   pecNote         String?       @map("pec_note")
+  // Da dove viene la posizione: PHOTO = GPS della foto (luogo dello scatto), DEVICE = telefono all'invio
+  locationSource  String        @default("DEVICE") @map("location_source")
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
 

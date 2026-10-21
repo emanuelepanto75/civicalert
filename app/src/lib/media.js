@@ -32,6 +32,21 @@ function readExif(exifBuffer) {
 }
 
 /**
+ * Posizione e ora dello scatto lette dalla foto, senza salvarla (vuoto per i
+ * video o se il telefono le ha tolte). takenAt è l'ora locale dello scatto
+ * espressa come UTC (EXIF non indica il fuso): va mostrata con timeZone 'UTC'.
+ */
+export async function photoInfo(file) {
+  if (!file || typeof file === 'string' || !IMAGE_TYPES.includes(file.type)) return {};
+  try {
+    const meta = await sharp(Buffer.from(await file.arrayBuffer())).metadata();
+    return meta.exif ? readExif(meta.exif) : {};
+  } catch {
+    return {};
+  }
+}
+
+/**
  * Salva il file caricato in UPLOAD_DIR/anno/mese/. Le foto vengono ruotate,
  * ridimensionate e ricodificate in JPEG senza metadati (privacy).
  */

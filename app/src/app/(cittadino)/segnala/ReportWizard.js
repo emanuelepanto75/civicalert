@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '@/components/api';
 import { useGeolocation } from './useGeolocation';
 
@@ -14,7 +14,23 @@ export default function ReportWizard({ categories, review }) {
   const [categoryId, setCategoryId] = useState(null);
   const [description, setDescription] = useState('');
   const [result, setResult] = useState(null);
+  const [photoInfo, setPhotoInfo] = useState(null);
   const geo = useGeolocation();
+
+  // Posizione e ora dello scatto lette dalla foto (se il telefono le ha lasciate)
+  useEffect(() => {
+    setPhotoInfo(null);
+    if (!file || !file.type.startsWith('image/')) return;
+    let cancelled = false;
+    const form = new FormData();
+    form.append('media', file);
+    api('/api/reports/photo-info', { body: form })
+      .then((res) => !cancelled && setPhotoInfo(res))
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [file]);
 
   useEffect(() => {
     if (!file) {
@@ -59,6 +75,7 @@ export default function ReportWizard({ categories, review }) {
             category={categories.find((c) => c.id === categoryId)}
             description={description}
             geo={geo}
+            photoInfo={photoInfo}
             review={review}
             onBack={() => setStep(1)}
             onDone={setResult}
@@ -153,16 +170,29 @@ function CategoryStep({ categories, categoryId, setCategoryId, description, setD
   );
 }
 
-function ReviewStep({ file, preview, category, description, geo, review, onBack, onDone }) {
+function ReviewStep({ file, preview, category, description, geo, photoInfo, review, onBack, onDone }) {
   const [check, setCheck] = useState(null);
   const [checking, setChecking] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState(null);
-  const position = geo.position;
+  const [source, setSource] = useState(null); // 'photo' | 'device', scelto dal cittadino
+
+  // Due posizioni possibili: dove è stata scattata la foto e dove si trova ora il telefono.
+  // Se sono lontane (o il GPS del telefono non c'è) il cittadino sceglie quale usare.
+  const device = geo.position;
+  const photo = useMemo(
+    () => (photoInfo?.gps ? { latitude: photoInfo.latitude, longitude: photoInfo.longitude } : null),
+    [photoInfo],
+  );
+  const apart = photo && device ? distanceM(photo, device) : null;
+  const needChoice = Boolean(photo && (!device || apart > SAME_PLACE_M));
+  const useSource = needChoice ? source : 'device';
+  const position = useSource === 'photo' ? photo : useSource === 'device' ? device : null;
 
   // Quando la posizione è disponibile (o migliora) chiede al server indirizzo,
   // comune competente e se esiste già una segnalazione uguale.
   useEffect(() => {
+    setCheck(null);
     if (!position) return;
     let cancelled = false;
     setChecking(true);
@@ -184,7 +214,8 @@ function ReviewStep({ file, preview, category, description, geo, review, onBack,
     form.append('description', description);
     form.append('latitude', position.latitude);
     form.append('longitude', position.longitude);
-    form.append('accuracy', position.accuracy);
+    if (position.accuracy != null) form.append('accuracy', position.accuracy);
+    form.append('locationSource', useSource);
     try {
       onDone(await api('/api/reports', { body: form }));
     } catch (err) {
@@ -209,8 +240,18 @@ function ReviewStep({ file, preview, category, description, geo, review, onBack,
           {description && <div className="kv"><span className="k">Descrizione</span><span className="v">{description}</span></div>}
           <div className="divider" />
 
-          <div className={`info-box ${position ? 'ok' : ''}`}>
-            <span className="label">📡 Posizione GPS</span>
+          {needChoice && (
+            <LocationChoice photo={photoInfo} geo={geo} apart={apart} source={source} setSource={setSource} />
+          )}
+          {!needChoice && file.type.startsWith('image/') && photoInfo && !photoInfo.gps && (
+            <div className="muted small">
+              La foto non contiene la posizione dello scatto: verrà usata la posizione attuale del telefono. Se non sei sul
+              posto, invia la segnalazione quando ci torni. Su iPhone, scegliendo dalla galleria, tocca «Opzioni» e attiva
+              «Posizione».
+            </div>
+          )}
+          <div className={`info-box ${position ? 'ok' : ''}`} style={needChoice && !position ? { display: 'none' } : undefined}>
+            <span className="label">📡 {useSource === 'photo' ? 'Posizione della foto' : 'Posizione GPS'}</span>
             {geo.status === 'loading' && !position && <span className="value">⏳ Rilevamento posizione…</span>}
             {geo.status === 'error' && !position && (
               <>
@@ -222,7 +263,8 @@ function ReviewStep({ file, preview, category, description, geo, review, onBack,
               <>
                 <span className="value">{check?.address || (checking ? 'Ricerca indirizzo…' : 'Posizione rilevata')}</span>
                 <span className="sub">
-                  {position.latitude.toFixed(6)}, {position.longitude.toFixed(6)} · precisione ±{Math.round(position.accuracy)} m
+                  {position.latitude.toFixed(6)}, {position.longitude.toFixed(6)}
+                  {position.accuracy != null ? ` · precisione ±${Math.round(position.accuracy)} m` : ' · dal luogo dello scatto'}
                 </span>
               </>
             )}
@@ -292,6 +334,54 @@ function ReviewNotice() {
     <div className="alert warn small">
       🕵️ <strong>Fase di avvio:</strong> ogni segnalazione viene controllata dall’amministratore di CivicAlerts e inviata
       al Comune di appartenenza <strong>solo dopo l’approvazione</strong>. Ti avviseremo via email appena verificata.
+    </div>
+  );
+}
+
+const SAME_PLACE_M = 150; // oltre questa distanza foto e telefono sono "posti diversi"
+
+function distanceM(a, b) {
+  const rad = (d) => (d * Math.PI) / 180;
+  const h =
+    Math.sin(rad(b.latitude - a.latitude) / 2) ** 2 +
+    Math.cos(rad(a.latitude)) * Math.cos(rad(b.latitude)) * Math.sin(rad(b.longitude - a.longitude) / 2) ** 2;
+  return 6371000 * 2 * Math.asin(Math.sqrt(h));
+}
+
+const shotTime = (iso) =>
+  new Date(iso).toLocaleString('it-IT', { timeZone: 'UTC', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+// La foto è stata scattata altrove: il cittadino conferma dove si trova il problema.
+function LocationChoice({ photo, geo, apart, source, setSource }) {
+  const far = apart != null ? (apart >= 1000 ? `${(apart / 1000).toFixed(1)} km` : `${Math.round(apart)} m`) : null;
+  return (
+    <div className="info-box">
+      <span className="label">📍 Dove si trova il problema?</span>
+      <span className="sub">
+        {far ? `La foto è stata scattata a ${far} da dove ti trovi ora.` : 'La foto contiene la posizione dello scatto.'} Scegli
+        la posizione da inviare al Comune:
+      </span>
+      <label className="check" style={{ marginTop: 6 }}>
+        <input type="radio" name="source" checked={source === 'photo'} onChange={() => setSource('photo')} />
+        <span>
+          <strong>📷 Dove ho scattato la foto</strong>
+          {photo.takenAt && <> ({shotTime(photo.takenAt)})</>}
+          <br />
+          <span className="small muted">{photo.address || `${photo.latitude.toFixed(5)}, ${photo.longitude.toFixed(5)}`}</span>
+        </span>
+      </label>
+      <label className="check">
+        <input type="radio" name="source" checked={source === 'device'} disabled={!geo.position} onChange={() => setSource('device')} />
+        <span>
+          <strong>📱 Dove mi trovo adesso</strong>
+          <br />
+          <span className="small muted">
+            {geo.position
+              ? `${geo.position.latitude.toFixed(5)}, ${geo.position.longitude.toFixed(5)}`
+              : geo.status === 'error' ? 'posizione del telefono non disponibile' : 'rilevamento…'}
+          </span>
+        </span>
+      </label>
     </div>
   );
 }

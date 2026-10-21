@@ -22,6 +22,11 @@ function channelsNote() {
   };
 }
 
+// Ora dello scatto: EXIF non ha il fuso, l'ora locale è salvata come UTC
+function formatShot(date) {
+  return new Date(date).toLocaleString('it-IT', { timeZone: 'UTC', dateStyle: 'long', timeStyle: 'short' });
+}
+
 function formatDate(date) {
   return new Date(date).toLocaleString('it-IT', {
     timeZone: 'Europe/Rome',
@@ -54,6 +59,8 @@ export function buildReportPec({ report, siteUrl, repeat = null }) {
     ['Data e ora', formatDate(report.createdAt)],
     ['Indirizzo stimato', report.address || 'non disponibile'],
     ['Coordinate GPS', `${report.latitude.toFixed(6)}, ${report.longitude.toFixed(6)}`],
+    ['Origine della posizione', report.locationSource === 'PHOTO' ? 'GPS della foto (luogo dello scatto)' : 'GPS del telefono al momento dell’invio'],
+    ...(report.photoTakenAt ? [['Foto scattata il', formatShot(report.photoTakenAt)]] : []),
     ['Descrizione', report.description || '—'],
     ...(repeat ? [['Segnalazioni dello stesso problema', `${repeat.number} (prima: ${repeat.firstCode}, ${formatDate(repeat.firstDate)})`]] : []),
     ['Segnalante', user ? `${user.firstName} ${user.lastName}` : 'utente rimosso'],
