@@ -21,6 +21,12 @@ const FLAG_LABELS = {
   GPS_IMPRECISO: 'Posizione GPS poco precisa (oltre 100 m)',
 };
 
+// Nello storico l'approvazione porta allo stato "ricevuta" solo per un istante, prima dell'invio della PEC
+const eventStatusLabel = (e) =>
+  e.fromStatus === 'REVIEW' && e.toStatus === 'PENDING' ? 'Approvata, PEC al Comune' : OFFICE_STATUS[e.toStatus];
+// Note scritte dall'app (es. risposte lette dalla casella PEC), senza autore
+const autoEvent = (e) => !e.actor && e.kind === 'NOTE' && /^PEC /.test(e.note || '');
+
 export default async function OfficeReportPage({ params }) {
   const { code } = await params;
   const user = await requireStaffPage(`/ufficio/segnalazioni/${code}`);
@@ -176,12 +182,12 @@ export default async function OfficeReportPage({ params }) {
               {events.map((e) => (
                 <div key={e.id} className={`tl-item ${e.kind === 'NOTE' ? 'note' : ''}`}>
                   <div className="when">
-                    {fmt(e.createdAt)} · {e.actor ? `${e.actor.firstName} ${e.actor.lastName}` : 'utente rimosso'}
-                    {e.kind === 'NOTE' && ' · nota interna'}
+                    {fmt(e.createdAt)} · {e.actor ? `${e.actor.firstName} ${e.actor.lastName}` : autoEvent(e) ? 'CivicAlerts (automatico)' : 'utente rimosso'}
+                    {e.kind === 'NOTE' && !autoEvent(e) && ' · nota interna'}
                     {e.kind === 'STATUS' && e.visibleToCitizen && ' · cittadino avvisato'}
                   </div>
                   {e.kind === 'STATUS' && (
-                    <div>Stato: <span className={`badge ${e.toStatus}`}>{OFFICE_STATUS[e.toStatus]}</span></div>
+                    <div>Stato: <span className={`badge ${e.toStatus}`}>{eventStatusLabel(e)}</span></div>
                   )}
                   {e.note && <div style={{ marginTop: 2, whiteSpace: 'pre-wrap' }}>{e.note}</div>}
                 </div>
