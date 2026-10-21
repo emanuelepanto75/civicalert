@@ -100,7 +100,9 @@ export default function PecEditor({ code }) {
       )}
       {message && <div className={`alert ${message.ok ? 'ok' : 'error'}`} style={{ marginTop: 10 }}>{message.text}</div>}
 
-      <iframe title="Anteprima PEC" srcDoc={data.html} sandbox=""
+      {/* I link dell'anteprima (mappa, dettaglio) si aprono in una nuova scheda: molti siti non si lasciano mostrare in un riquadro */}
+      <iframe title="Anteprima PEC" srcDoc={data.html.replace('<body', '<base target="_blank"><body')}
+        sandbox="allow-popups allow-popups-to-escape-sandbox"
         style={{ width: '100%', height: 620, border: '1px solid var(--border)', borderRadius: 10, marginTop: 14, background: '#fff' }} />
     </div>
   );
