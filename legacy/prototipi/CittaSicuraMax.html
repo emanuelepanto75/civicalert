@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CittàSicura – Segnala un Pericolo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root {
+  --bg:#080b12; --surface:#0f1420; --card:#151b2e; --card2:#1a2138;
+  --border:#252d45; --accent:#3b82f6; --accent2:#f59e0b;
+  --danger:#ef4444; --success:#22c55e; --warning:#f59e0b;
+  --text:#e8eaf6; --muted:#6b7a99; --radius:16px; --rsm:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* HEADER */
+header{background:linear-gradient(135deg,#0f1420,#151b2e);border-bottom:1px solid var(--border);padding:12px 18px 10px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 2px 20px rgba(0,0,0,.5)}
+.logo-wrap{display:flex;flex-direction:column;gap:1px}
+.logo{font-family:'Space Grotesk',sans-serif;font-size:1.5rem;font-weight:700;letter-spacing:-.5px;display:flex;align-items:center;gap:8px}
+.logo-icon{width:28px;height:28px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.logo-cs{background:linear-gradient(90deg,#3b82f6,#60a5fa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-safe{background:linear-gradient(90deg,#f59e0b,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.logo-v{font-size:.62rem;font-weight:600;color:var(--muted);letter-spacing:1px;vertical-align:middle;font-family:'Inter',sans-serif;-webkit-text-fill-color:var(--muted)}
+.logo-author{font-size:.63rem;color:var(--muted);font-weight:400}
+.header-btn{background:var(--card2);border:1px solid var(--border);color:var(--muted);border-radius:var(--rsm);padding:8px 13px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .2s}
+.header-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* TABS */
+.tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;position:sticky;top:62px;z-index:100}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:1;min-width:72px;padding:11px 5px 10px;text-align:center;font-family:'Inter',sans-serif;font-size:.7rem;font-weight:600;letter-spacing:.3px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-icon{display:block;font-size:1.1rem;margin-bottom:3px}
+
+/* PAGES */
+.page{display:none;padding:15px;padding-bottom:30px}
+.page.active{display:block}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:15px;margin-bottom:13px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent);opacity:.4}
+.card.cw::before{background:linear-gradient(90deg,var(--warning),transparent)}
+.card.cd::before{background:linear-gradient(90deg,var(--danger),transparent)}
+.card.cs::before{background:linear-gradient(90deg,var(--success),transparent)}
+.card-title{font-family:'Space Grotesk',sans-serif;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.ct-icon{width:20px;height:20px;border-radius:5px;background:rgba(59,130,246,.15);display:flex;align-items:center;justify-content:center;font-size:.8rem}
+
+/* INTRO */
+.intro-card{background:linear-gradient(135deg,#0f1420,#151b2e);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--radius);padding:14px;margin-bottom:13px}
+.steps{display:flex;flex-direction:column}
+.step{display:flex;align-items:flex-start;gap:11px;padding:9px 0;border-bottom:1px solid var(--border)}
+.step:last-child{border-bottom:none}
+.step-num{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;flex-shrink:0;margin-top:1px}
+.step-text{font-size:.8rem;color:var(--muted);line-height:1.5}
+.step-text strong{color:var(--text)}
+
+/* WARN */
+.warn-banner{display:none;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.3);border-radius:var(--rsm);padding:11px 13px;margin-bottom:13px;font-size:.8rem;color:#fcd34d;line-height:1.5}
+
+/* FOTO */
+.photo-area{width:100%;height:185px;border:2px dashed var(--border);border-radius:var(--rsm);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;position:relative;background:#0a0e18}
+.photo-placeholder{color:var(--muted);text-align:center;pointer-events:none}
+.photo-placeholder .icon{font-size:2.6rem;margin-bottom:5px;display:block}
+.photo-placeholder p{font-size:.8rem;line-height:1.5}
+.photo-overlay{position:absolute;bottom:8px;right:8px;background:var(--success);color:#fff;border-radius:6px;padding:3px 9px;font-size:.7rem;font-weight:700}
+#fileInput,#fileInputCamera,#fileInputGalleria{display:none}
+.photo-btns{display:flex;gap:8px;margin-top:9px}
+.photo-btn{flex:1;padding:10px 5px;background:var(--card2);border:1px solid var(--border);border-radius:var(--rsm);color:var(--text);font-family:'Inter',sans-serif;font-weight:600;font-size:.8rem;cursor:pointer;text-align:center;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px}
+.photo-btn:active{border-color:var(--accent)}
+
+/* GPS */
+.gps-perm-banner{display:none;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-radius:var(--rsm);padding:12px;margin-bottom:11px;font-size:.78rem;color:#fca5a5;line-height:1.65}
+.gps-box{background:var(--card2);border:1px solid var(--border);border-radius:var(--rsm);padding:12px;display:flex;align-items:center;gap:11px}
+.gps-signal{width:38px;height:38px;border-radius:50%;background:rgba(59,130,246,.1);border:1.5px solid rgba(59,130,246,.3);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;transition:all .3s}
+.gps-signal.active{background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.5);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.3)}50%{box-shadow:0 0 0 8px rgba(34,197,94,0)}}
+.gps-info{flex:1;min-width:0}
+.gps-coords{font-family:'Space Grotesk',monospace;font-size:.85rem;font-weight:600;color:var(--success);word-break:break-all}
+.gps-status{font-size:.72rem;color:var(--muted);margin-top:3px}
+.gps-btn{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;border:none;border-radius:var(--rsm);padding:9px 14px;font-weight:700;font-family:'Inter',sans-serif;font-size:.8rem;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:opacity .2s;display:flex;align-items:center;gap:5px}
+.gps-btn:disabled{opacity:.5;cursor:not-allowed}
+.gps-btn.ok{background:linear-gradient(135deg,#22c55e,#16a34a)}
+#minimap{width:100%;height:125px;border-radius:var(--rsm);border:1px solid var(--border);margin-top:9px;display:none}
+
+/* COMUNE */
+.comune-name{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:13px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.db-badge{font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(34,197,94,.15);color:var(--success)}
+.db-badge.miss{background:rgba(107,122,153,.15);color:var(--muted)}
+.dest-section-title{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:11px 0 7px;display:flex;align-items:center;gap:6px}
+.dest-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.email-dest-row{display:flex;align-items:flex-start;gap:7px;margin-bottom:7px}
+.email-dest-inner{flex:1}
+.email-dest-label{font-size:.65rem;font-weight:600;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px}
+.email-dest-row input[type="email"]{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:7px;color:var(--text);font-family:'Inter',sans-serif;font-size:.8rem;padding:8px 10px;outline:none;transition:border-color .2s;margin:0}
+.email-dest-row input[type="email"]:focus{border-color:var(--accent)}
+.remove-dest-btn{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:7px;padding:7px 9px;cursor:pointer;font-size:.85rem;margin-top:20px;flex-shrink:0}
+.procura-notice{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.25);border-radius:8px;padding:10px 12px;font-size:.76rem;color:#fca5a5;line-height:1.5;margin-top:10px;display:none}
+.add-dest-btn{width:100%;margin-top:6px;background:transparent;border:1.5px dashed var(--border);border-radius:8px;padding:8px;color:var(--muted);font-family:'Inter',sans-serif;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s}
+.add-dest-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* CATEGORIE */
+.categories{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.cat-btn{background:var(--card2);border:1.5px solid var(--border);border-radius:var(--rsm);padding:10px 5px;text-align:center;cursor:pointer;transition:all .2s}
+.cat-btn.selected{border-color:var(--accent);background:rgba(59,130,246,.1)}
+.cat-btn .emoji{font-size:1.45rem;display:block;margin-bottom:4px}
+.cat-btn .label{font-size:.64rem;color:var(--muted);font-weight:600;letter-spacing:.3px}
+.cat-btn.selected .label{color:var(--accent)}
+
+/* GRAVITA */
+.gravity-btns{display:flex;gap:7px}
+.grav-btn{flex:1;padding:12px 5px;border-radius:var(--rsm);border:1.5px solid var(--border);background:var(--card2);color:var(--muted);font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.8rem;cursor:pointer;text-align:center;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px}
+.grav-btn.sel-low{border-color:#22c55e;background:rgba(34,197,94,.1);color:#22c55e}
+.grav-btn.sel-med{border-color:#f59e0b;background:rgba(245,158,11,.1);color:#f59e0b}
+.grav-btn.sel-high{border-color:#ef4444;background:rgba(239,68,68,.1);color:#ef4444}
+
+/* NOTE */
+textarea{width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:var(--rsm);color:var(--text);font-family:'Inter',sans-serif;font-size:.88rem;padding:11px;resize:none;outline:none;transition:border-color .2s;line-height:1.5}
+textarea:focus{border-color:var(--accent)}
+textarea::placeholder{color:var(--muted)}
+
+/* SEND */
+.send-btn{width:100%;padding:15px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;border:none;border-radius:var(--radius);font-family:'Space Grotesk',sans-serif;font-size:1.05rem;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:all .2s;margin-top:5px;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 4px 20px rgba(59,130,246,.3)}
+.send-btn:active{transform:scale(.98)}
+
+/* MAPPA */
+#map{width:100%;height:370px;border-radius:var(--radius);border:1px solid var(--border)}
+.map-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:9px;font-size:.73rem;color:var(--muted)}
+.map-legend span{display:flex;align-items:center;gap:5px}
+.ldot{width:9px;height:9px;border-radius:50%;display:inline-block}
+
+/* STORICO */
+.storico-header{display:none;justify-content:space-between;align-items:center;margin-bottom:13px}
+.storico-count{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted)}
+.del-all-btn{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;padding:7px 12px;font-family:'Inter',sans-serif;font-weight:600;font-size:.76rem;cursor:pointer}
+.storico-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:10px;display:flex;gap:10px}
+.storico-thumb{width:62px;height:62px;border-radius:9px;background:var(--card2);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:1.7rem;border:1px solid var(--border)}
+.storico-thumb img{width:100%;height:100%;object-fit:cover}
+.storico-info{flex:1;min-width:0}
+.storico-cat{font-family:'Space Grotesk',sans-serif;font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.storico-meta{font-size:.7rem;color:var(--muted);margin-bottom:1px}
+.grav-pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:.65rem;font-weight:700;margin-top:4px}
+.grav-pill.bassa{background:rgba(34,197,94,.15);color:#22c55e}
+.grav-pill.media{background:rgba(245,158,11,.15);color:#f59e0b}
+.grav-pill.alta{background:rgba(239,68,68,.15);color:#ef4444}
+.del-item-btn{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#f87171;border-radius:8px;padding:6px 9px;cursor:pointer;font-size:.88rem;flex-shrink:0;align-self:flex-start}
+.empty-state{text-align:center;padding:50px 20px;color:var(--muted)}
+.empty-state .big{font-size:3.5rem;margin-bottom:12px}
+.empty-state p{font-size:.86rem;line-height:1.6}
+
+/* IMPOSTAZIONI */
+.settings-label{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:5px}
+input[type="text"],input[type="email"]{width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:var(--rsm);color:var(--text);font-family:'Inter',sans-serif;font-size:.88rem;padding:10px 12px;outline:none;transition:border-color .2s;margin-bottom:9px}
+input[type="text"]:focus,input[type="email"]:focus{border-color:var(--accent)}
+input::placeholder{color:var(--muted)}
+.email-row{display:flex;gap:7px;margin-bottom:7px}
+.email-row input{margin-bottom:0}
+.remove-btn{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:8px;padding:0 11px;cursor:pointer;font-size:.95rem;flex-shrink:0}
+.add-btn{background:transparent;border:1.5px dashed var(--border);border-radius:var(--rsm);padding:9px;width:100%;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;font-size:.8rem;color:var(--muted);transition:all .2s;margin-top:2px}
+.add-btn:hover{border-color:var(--accent);color:var(--accent)}
+.save-btn{width:100%;padding:13px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;border:none;border-radius:var(--radius);font-family:'Space Grotesk',sans-serif;font-size:.95rem;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(59,130,246,.25)}
+
+/* ═══ MODALE FOTO ═══ */
+.foto-modal {
+  display:none; position:fixed; inset:0; z-index:500;
+  background:rgba(0,0,0,.92);
+  flex-direction:column; align-items:center; justify-content:center;
+  padding:20px;
+}
+.foto-modal.show { display:flex; }
+.foto-modal img {
+  max-width:100%; max-height:55vh;
+  border-radius:12px; border:2px solid var(--accent);
+  object-fit:contain;
+}
+.foto-modal-title {
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1.1rem; font-weight:700;
+  color:#fff; margin-bottom:12px; text-align:center;
+}
+.foto-modal-sub {
+  font-size:.82rem; color:#94a3b8;
+  text-align:center; margin-top:12px; line-height:1.6;
+}
+.foto-modal-sub strong { color:#fff; }
+.foto-modal-btns {
+  display:flex; flex-direction:column; gap:10px;
+  width:100%; margin-top:18px;
+}
+.fmbtn {
+  width:100%; padding:14px;
+  border:none; border-radius:12px;
+  font-family:'Space Grotesk',sans-serif;
+  font-size:1rem; font-weight:700; cursor:pointer;
+  transition:opacity .2s;
+}
+.fmbtn:active { opacity:.8; }
+.fmbtn-primary {
+  background:linear-gradient(135deg,#3b82f6,#1d4ed8); color:#fff;
+}
+.fmbtn-save {
+  background:linear-gradient(135deg,#22c55e,#16a34a); color:#fff;
+}
+.fmbtn-skip {
+  background:transparent; color:var(--muted);
+  border:1.5px solid var(--border);
+  font-size:.88rem;
+}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--success);color:#fff;padding:10px 20px;border-radius:30px;font-weight:700;font-family:'Inter',sans-serif;font-size:.87rem;z-index:999;transition:transform .3s ease;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,.5);max-width:90vw;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.toast.err{background:var(--danger)}
+.badge{background:var(--danger);color:#fff;font-size:.58rem;font-weight:700;padding:1px 5px;border-radius:10px;vertical-align:super;margin-left:2px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-wrap">
+    <div class="logo">
+      <div class="logo-icon">🛡</div>
+      <span class="logo-cs">Città</span><span class="logo-safe">Sicura</span>
+      <span class="logo-v">v1.1</span>
+    </div>
+    <div class="logo-author">di Massimo Filippello &mdash; tutti i diritti riservati</div>
+  </div>
+  <button class="header-btn" onclick="setTab('impostazioni')">⚙ Impost.</button>
+</header>
+
+<nav class="tabs">
+  <div class="tab active" onclick="setTab('segnala')"      id="tab-segnala"><span class="tab-icon">📸</span>Segnala</div>
+  <div class="tab"        onclick="setTab('mappa')"        id="tab-mappa"><span class="tab-icon">🗺</span>Mappa</div>
+  <div class="tab"        onclick="setTab('storico')"      id="tab-storico"><span class="tab-icon">📋</span>Storico<span class="badge" id="badgeCount">0</span></div>
+  <div class="tab"        onclick="setTab('impostazioni')" id="tab-impostazioni"><span class="tab-icon">⚙</span>Impost.</div>
+</nav>
+
+<!-- ═══ SEGNALA ═══ -->
+<div class="page active" id="page-segnala">
+  <div class="intro-card">
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Scatta la foto</strong> del problema</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text"><strong>GPS</strong> → rileva il comune automaticamente</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Categoria + Gravità</strong> → email precompilate</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-text"><strong>Invia</strong> → si apre il client email già compilato</div></div>
+    </div>
+  </div>
+
+  <div id="warnDati" class="warn-banner">⚠️ <strong>Dati mancanti.</strong> Vai in <strong>⚙ Impostazioni</strong> e inserisci nome, email e telefono.</div>
+
+  <!-- FOTO -->
+  <div class="card">
+    <div class="card-title"><div class="ct-icon">📷</div>Foto del problema</div>
+    <div class="photo-area" id="photoArea">
+      <div class="photo-placeholder"><span class="icon">📸</span><p>Usa i pulsanti qui sotto</p></div>
+    </div>
+    <div class="photo-btns">
+      <button class="photo-btn" onclick="document.getElementById('fileInputCamera').click()">📷 Fotocamera</button>
+      <button class="photo-btn" onclick="document.getElementById('fileInputGalleria').click()">🖼 Galleria</button>
+    </div>
+    <input type="file" id="fileInput"         accept="image/*"                     onchange="handlePhoto(event)">
+    <input type="file" id="fileInputCamera"   accept="image/*" capture="environment" onchange="handlePhoto(event)">
+    <input type="file" id="fileInputGalleria" accept="image/*"                     onchange="handlePhoto(event)">
+  </div>
+
+  <!-- GPS -->
+  <div class="card">
+    <div class="card-title"><div class="ct-icon">📍</div>Posizione GPS</div>
+    <div class="gps-perm-banner" id="gpsPermBanner">
+      <strong>⚠️ Permesso GPS negato</strong><br>
+      <strong>Android:</strong> Impostazioni → App → Browser → Autorizzazioni → Posizione → Consenti<br>
+      <strong>iPhone/Safari:</strong> Impostazioni → Safari → Posizione → Chiedi o Consenti<br>
+      Poi ricarica la pagina e riprova.
+    </div>
+    <div class="gps-box">
+      <div class="gps-signal" id="gpsSignal">🛰</div>
+      <div class="gps-info">
+        <div class="gps-coords" id="coordsDisplay">Non rilevata</div>
+        <div class="gps-status" id="gpsStatus">Tocca GPS per rilevare la posizione</div>
+      </div>
+      <button class="gps-btn" id="gpsBtn" onclick="getGPS()">📍 GPS</button>
+    </div>
+    <div id="minimap"></div>
+  </div>
+
+  <!-- COMUNE + EMAIL -->
+  <div class="card cs" id="comuneCard" style="display:none">
+    <div class="card-title"><div class="ct-icon">🏛</div>Comune rilevato</div>
+    <div class="comune-name" id="comuneRilevato"></div>
+    <div class="dest-section-title">📧 Email normale</div>
+    <div id="emailNormaleList"></div>
+    <div class="dest-section-title">📜 PEC ufficiale</div>
+    <div id="emailPecList"></div>
+    <div class="procura-notice" id="procuraNotice">🔴 <strong>Gravità ALTA</strong> — verrà inviata copia per conoscenza alla <strong>Procura della Repubblica</strong> competente.</div>
+    <button class="add-dest-btn" onclick="aggiungiEmailDest()">+ Aggiungi destinatario</button>
+    <div id="emailExtraList"></div>
+    <div id="emailSalvataNotice" style="display:none;font-size:.7rem;color:var(--success);margin-top:7px">✅ Email salvate per questo comune</div>
+  </div>
+
+  <!-- CATEGORIA -->
+  <div class="card">
+    <div class="card-title"><div class="ct-icon">🏷</div>Categoria</div>
+    <div class="categories">
+      <div class="cat-btn" onclick="selectCat(this,'Buca stradale')"><span class="emoji">🕳</span><span class="label">Buca</span></div>
+      <div class="cat-btn" onclick="selectCat(this,'Allagamento')"><span class="emoji">🌊</span><span class="label">Allagamento</span></div>
+      <div class="cat-btn" onclick="selectCat(this,'Segnale mancante')"><span class="emoji">🚧</span><span class="label">Segnale</span></div>
+      <div class="cat-btn" onclick="selectCat(this,'Tombino rotto')"><span class="emoji">🔩</span><span class="label">Tombino</span></div>
+      <div class="cat-btn" onclick="selectCat(this,'Illuminazione guasta')"><span class="emoji">💡</span><span class="label">Lampione</span></div>
+      <div class="cat-btn" onclick="selectCat(this,'Marciapiede dissestato')"><span class="emoji">🧱</span><span class="label">Marciapiede</span></div>
+      <div class="cat-btn" onclick="selectCat(this,'Ostacolo in carreggiata')"><span class="emoji">⛔</span><span class="label">Ostacolo</span></div>
+      <div class="cat-btn" onclick="selectCat(this,'Rifiuti abbandonati')"><span class="emoji">🗑</span><span class="label">Rifiuti</span></div>
+      <div class="cat-btn" onclick="selectCat(this,'Altro pericolo')"><span class="emoji">⚠️</span><span class="label">Altro</span></div>
+    </div>
+  </div>
+
+  <!-- GRAVITA -->
+  <div class="card">
+    <div class="card-title"><div class="ct-icon">⚠️</div>Gravità del problema</div>
+    <div class="gravity-btns">
+      <button class="grav-btn" onclick="selectGrav(this,'Bassa','sel-low')">🟢 Bassa</button>
+      <button class="grav-btn" onclick="selectGrav(this,'Media','sel-med')">🟡 Media</button>
+      <button class="grav-btn" onclick="selectGrav(this,'Alta','sel-high')">🔴 Alta</button>
+    </div>
+  </div>
+
+  <!-- NOTE -->
+  <div class="card">
+    <div class="card-title"><div class="ct-icon">📝</div>Note aggiuntive</div>
+    <textarea id="note" rows="3" placeholder="Descrivi brevemente il problema (opzionale)..."></textarea>
+  </div>
+
+  <button class="send-btn" onclick="inviaEmail()">🚀 Invia Segnalazione</button>
+</div>
+
+<!-- ═══ MAPPA ═══ -->
+<div class="page" id="page-mappa">
+  <div class="card">
+    <div class="card-title"><div class="ct-icon">🗺</div>Segnalazioni sul territorio</div>
+    <div id="map"></div>
+    <div class="map-legend">
+      <span><span class="ldot" style="background:#ef4444"></span>Alta gravità</span>
+      <span><span class="ldot" style="background:#f59e0b"></span>Media</span>
+      <span><span class="ldot" style="background:#22c55e"></span>Bassa</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ STORICO ═══ -->
+<div class="page" id="page-storico">
+  <div class="storico-header" id="storicoHeader">
+    <span class="storico-count" id="storicoCount"></span>
+    <button class="del-all-btn" onclick="cancellatutte()">🗑 Cancella tutte</button>
+  </div>
+  <div id="storicoList"></div>
+</div>
+
+<!-- ═══ IMPOSTAZIONI ═══ -->
+<div class="page" id="page-impostazioni">
+  <div class="card cw">
+    <div class="card-title"><div class="ct-icon">👤</div>I tuoi dati (obbligatori)</div>
+    <p style="font-size:.76rem;color:var(--muted);margin-bottom:13px;line-height:1.5">Inclusi in ogni segnalazione per identificarti. Salvati solo sul tuo dispositivo.</p>
+    <div class="settings-label">Nome e Cognome *</div>
+    <input type="text"  id="nomeMittente"     placeholder="es. Mario Rossi">
+    <div class="settings-label">La tua email *</div>
+    <input type="email" id="emailMittente"    placeholder="es. mario.rossi@gmail.com">
+    <div class="settings-label">Telefono *</div>
+    <input type="text"  id="telefonoMittente" placeholder="es. 333 1234567">
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="ct-icon">🏛</div>Comune (fallback GPS)</div>
+    <div class="settings-label">Nome comune</div>
+    <input type="text" id="nomeComune" placeholder="es. Catania">
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="ct-icon">📧</div>Email extra (sempre incluse)</div>
+    <p style="font-size:.76rem;color:var(--muted);margin-bottom:11px;line-height:1.5">Indirizzi aggiuntivi fissi (es. assessore, ufficio ambiente).</p>
+    <div id="emailList">
+      <div class="email-row"><input type="email" placeholder="email@ente.it"><button class="remove-btn" onclick="removeEmail(this)">✕</button></div>
+    </div>
+    <button class="add-btn" onclick="addEmailField()">+ Aggiungi email extra</button>
+  </div>
+  <div class="card" style="border-left:3px solid var(--accent)">
+    <div class="card-title"><div class="ct-icon">💡</div>Come funzionano le email</div>
+    <p style="font-size:.76rem;color:var(--muted);line-height:1.65">
+      Il GPS identifica il comune e precompila automaticamente:<br><br>
+      📧 <strong>Email normale</strong> – Ufficio Tecnico del comune<br>
+      📜 <strong>PEC ufficiale</strong> – Protocollo Generale<br>
+      💡 <strong>ENEL</strong> – aggiunta automaticamente per i lampioni<br>
+      🔴 <strong>Procura della Repubblica</strong> – solo per gravità Alta<br>
+      📦 <strong>Archivio CittàSicura</strong> – copia automatica su cittasicura@yahoo.com<br>
+      ➕ Le email extra che aggiungi tu qui sopra
+    </p>
+  </div>
+  <button class="save-btn" onclick="saveSettings()">💾 Salva Impostazioni</button>
+</div>
+
+<!-- MODALE FOTO PRE-INVIO -->
+<div class="foto-modal" id="fotoModal">
+  <div class="foto-modal-title">📸 Salva la foto prima di inviare</div>
+  <img id="fotoModalImg" src="" alt="Foto segnalazione">
+  <div class="foto-modal-sub">
+    <strong>Come allegare la foto all'email:</strong><br>
+    📱 <strong>iPhone:</strong> tieni premuta la foto → "Aggiungi alla libreria"<br>
+    🤖 <strong>Android:</strong> tieni premuta la foto → "Salva immagine"<br><br>
+    Poi nell'email che si aprirà,<br>tocca 📎 e allega la foto salvata.
+  </div>
+  <div class="foto-modal-btns">
+    <button class="fmbtn fmbtn-save" onclick="salvaFotoDevice()">📥 Tieni premuto qui per salvare la foto</button>
+    <button class="fmbtn fmbtn-primary" onclick="proseguiInvio()">📧 Apri email e invia →</button>
+    <button class="fmbtn fmbtn-skip" onclick="proseguiInvio()">Salta — invia senza foto</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══ STATO ═══
+let currentLat=null,currentLng=null,currentComune='';
+let selectedCategory='',selectedGravity='';
+let photoDataUrl=null;
+let map=null,mapInitialized=false,minimap=null;
+let segnalazioni=JSON.parse(localStorage.getItem('segnalazioni')||'[]');
+let _mailtoLink='';
+
+// ═══ DATABASE SICILIA ═══
+const PROCURE={
+  catania:"procura.catania@giustizia.it",palermo:"procura.palermo@giustizia.it",
+  messina:"procura.messina@giustizia.it",siracusa:"procura.siracusa@giustizia.it",
+  ragusa:"procura.ragusa@giustizia.it",agrigento:"procura.agrigento@giustizia.it",
+  caltanissetta:"procura.caltanissetta@giustizia.it",enna:"procura.enna@giustizia.it",
+  trapani:"procura.trapani@giustizia.it"
+};
+const DB={
+  "aci bonaccorsi":{email:"comune@comune.acibonaccorsi.ct.it",pec:"protocollo@pec.comune.acibonaccorsi.ct.it",procura:PROCURE.catania},
+  "aci castello":{email:"info@comune.acicastello.ct.it",pec:"protocollo@pec.comune.acicastello.ct.it",procura:PROCURE.catania},
+  "aci catena":{email:"info@comune.acicatena.ct.it",pec:"comune.acicatena@pec.it",procura:PROCURE.catania},
+  "aci sant'antonio":{email:"info@comune.acisantantonio.ct.it",pec:"comune-acisantantonio@legalmail.it",procura:PROCURE.catania},
+  "acireale":{email:"urp@comune.acireale.ct.it",pec:"protocollo@pec.comune.acireale.ct.it",procura:PROCURE.catania},
+  "adrano":{email:"info@comune.adrano.ct.it",pec:"protocollo@pec.comune.adrano.ct.it",procura:PROCURE.catania},
+  "belpasso":{email:"info@comune.belpasso.ct.it",pec:"protocollo@pec.comune.belpasso.ct.it",procura:PROCURE.catania},
+  "biancavilla":{email:"info@comune.biancavilla.ct.it",pec:"protocollo@cert.comune.biancavilla.ct.it",procura:PROCURE.catania},
+  "bronte":{email:"info@comune.bronte.ct.it",pec:"protocollo.generale@brontepec.e-etna.it",procura:PROCURE.catania},
+  "calatabiano":{email:"info@comune.calatabiano.ct.it",pec:"protocollo_generale@calatabianopec.e-etna.it",procura:PROCURE.catania},
+  "caltagirone":{email:"urp@comune.caltagirone.ct.it",pec:"sindaco.caltagirone@pec.anci.it",procura:PROCURE.catania},
+  "catania":{email:"urp@comune.catania.it",pec:"comune.catania@pec.it",procura:PROCURE.catania},
+  "fiumefreddo di sicilia":{email:"info@comune.fiumefreddodisicilia.ct.it",pec:"comune.fiumefreddodisicilia.ct@legalmail.it",procura:PROCURE.catania},
+  "giarre":{email:"urp@comune.giarre.ct.it",pec:"protocollo.generale@giarrepec.e-etna.it",procura:PROCURE.catania},
+  "gravina di catania":{email:"info@comune.gravina.ct.it",pec:"comune.gravina-di-catania@legalmail.it",procura:PROCURE.catania},
+  "linguaglossa":{email:"info@comune.linguaglossa.ct.it",pec:"comune.linguaglossa@pec.it",procura:PROCURE.catania},
+  "mascali":{email:"info@comune.mascali.ct.it",pec:"amministrazione@pec.comune.mascali.ct.it",procura:PROCURE.catania},
+  "mascalucia":{email:"info@comune.mascalucia.ct.it",pec:"ced@pec.comunemascalucia.it",procura:PROCURE.catania},
+  "militello in val di catania":{email:"info@comune.militello.ct.it",pec:"protocollo@pec.comunemilitello.it",procura:PROCURE.catania},
+  "misterbianco":{email:"urp@comune.misterbianco.ct.it",pec:"protocollo@pec.misterbianco.gov.it",procura:PROCURE.catania},
+  "motta sant'anastasia":{email:"info@comune.mottasantanastasia.ct.it",pec:"infopost@pec.comune.mottasantanastasia.ct.it",procura:PROCURE.catania},
+  "nicolosi":{email:"info@comune.nicolosi.ct.it",pec:"protocollo@pec.comunenicolosi.it",procura:PROCURE.catania},
+  "palagonia":{email:"info@comune.palagonia.ct.it",pec:"sindaco.palagonia@cert.tnet.it",procura:PROCURE.catania},
+  "paterno":{email:"urp@comune.paterno.ct.it",pec:"sindaco@cert.comune.paterno.ct.it",procura:PROCURE.catania},
+  "paternò":{email:"urp@comune.paterno.ct.it",pec:"sindaco@cert.comune.paterno.ct.it",procura:PROCURE.catania},
+  "pedara":{email:"info@comune.pedara.ct.it",pec:"protocollo@pec.comune.pedara.ct.it",procura:PROCURE.catania},
+  "ramacca":{email:"info@comune.ramacca.ct.it",pec:"postmaster@pec.comunediramacca.it",procura:PROCURE.catania},
+  "randazzo":{email:"info@comune.randazzo.ct.it",pec:"protocollo_generale@randazzopec.e-etna.it",procura:PROCURE.catania},
+  "riposto":{email:"info@comune.riposto.ct.it",pec:"comune.riposto@pec.it",procura:PROCURE.catania},
+  "san giovanni la punta":{email:"info@comune.sangiovannilpunta.ct.it",pec:"protocollo@pec.comune.sangiovannilpunta.ct.it",procura:PROCURE.catania},
+  "sant'agata li battiati":{email:"info@comune.santagatalibattiati.ct.it",pec:"comune.santagata@pec.it",procura:PROCURE.catania},
+  "santa venerina":{email:"info@comune.santavenerina.ct.it",pec:"amministrazione@pec.comune.santavenerina.ct.it",procura:PROCURE.catania},
+  "trecastagni":{email:"info@comune.trecastagni.ct.it",pec:"protocollo@pec.comune.trecastagni.ct.it",procura:PROCURE.catania},
+  "tremestieri etneo":{email:"info@comune.tremestierietneo.ct.it",pec:"protocollo@pec.comune.tremestierietneo.ct.it",procura:PROCURE.catania},
+  "valverde":{email:"info@comune.valverde.ct.it",pec:"protocollo@pec.comune.valverde.ct.it",procura:PROCURE.catania},
+  "viagrande":{email:"info@comune.viagrande.ct.it",pec:"protocollo@pec.comune.viagrande.ct.it",procura:PROCURE.catania},
+  "zafferana etnea":{email:"info@comune.zafferanaetnea.ct.it",pec:"protocollo@pec.comune.zafferanaetnea.ct.it",procura:PROCURE.catania},
+  "palermo":{email:"urp@comune.palermo.it",pec:"protocollo@cert.comune.palermo.it",procura:PROCURE.palermo},
+  "bagheria":{email:"urp@comune.bagheria.pa.it",pec:"sindaco@postecert.it",procura:PROCURE.palermo},
+  "carini":{email:"urp@comune.carini.pa.it",pec:"protocollo@pec.comune.carini.pa.it",procura:PROCURE.palermo},
+  "monreale":{email:"urp@comune.monreale.pa.it",pec:"affarigenerali.monreale@pec.it",procura:PROCURE.palermo},
+  "partinico":{email:"urp@comune.partinico.pa.it",pec:"settoreaffarigeneraliepersonale@pec.comune.partinico.pa.it",procura:PROCURE.palermo},
+  "termini imerese":{email:"urp@comune.terminiimerese.pa.it",pec:"protocollo@pec.comuneterminiimerese.pa.it",procura:PROCURE.palermo},
+  "cefalu":{email:"urp@comune.cefalu.pa.it",pec:"protocollo@pec.comune.cefalu.pa.it",procura:PROCURE.palermo},
+  "cefalù":{email:"urp@comune.cefalu.pa.it",pec:"protocollo@pec.comune.cefalu.pa.it",procura:PROCURE.palermo},
+  "misilmeri":{email:"urp@comune.misilmeri.pa.it",pec:"comunedimisilmeri@pec.it",procura:PROCURE.palermo},
+  "villabate":{email:"urp@comune.villabate.pa.it",pec:"affarigenerali.villabate@pec.it",procura:PROCURE.palermo},
+  "ficarazzi":{email:"urp@comune.ficarazzi.pa.it",pec:"segreteriagenerale@cert.comune.ficarazzi.pa.it",procura:PROCURE.palermo},
+  "capaci":{email:"urp@comune.capaci.pa.it",pec:"protocollo.comunecapaci@pec.it",procura:PROCURE.palermo},
+  "messina":{email:"urp@comune.messina.it",pec:"comune.messina@pec.it",procura:PROCURE.messina},
+  "milazzo":{email:"urp@comune.milazzo.me.it",pec:"protocollo@pec.comune.milazzo.me.it",procura:PROCURE.messina},
+  "barcellona pozzo di gotto":{email:"urp@comune.barcellonapozzogotto.me.it",pec:"protocollo@pec.comune.barcellonapozzogotto.me.it",procura:PROCURE.messina},
+  "taormina":{email:"urp@comune.taormina.me.it",pec:"protocollo@pec.comune.taormina.me.it",procura:PROCURE.messina},
+  "lipari":{email:"urp@comune.lipari.me.it",pec:"protocollo@pec.comune.lipari.me.it",procura:PROCURE.messina},
+  "patti":{email:"urp@comune.patti.me.it",pec:"protocollo@pec.comune.patti.me.it",procura:PROCURE.messina},
+  "sant'agata di militello":{email:"urp@comune.santagatadimilitello.me.it",pec:"protocollo@pec.comune.santagatadimilitello.me.it",procura:PROCURE.messina},
+  "siracusa":{email:"urp@comune.siracusa.it",pec:"protocollo@pec.comune.siracusa.it",procura:PROCURE.siracusa},
+  "augusta":{email:"urp@comune.augusta.sr.it",pec:"protocollo@pec.comune.augusta.sr.it",procura:PROCURE.siracusa},
+  "avola":{email:"urp@comune.avola.sr.it",pec:"protocollo@pec.comune.avola.sr.it",procura:PROCURE.siracusa},
+  "noto":{email:"urp@comune.noto.sr.it",pec:"protocollo@pec.comune.noto.sr.it",procura:PROCURE.siracusa},
+  "rosolini":{email:"urp@comune.rosolini.sr.it",pec:"protocollo@pec.comune.rosolini.sr.it",procura:PROCURE.siracusa},
+  "floridia":{email:"urp@comune.floridia.sr.it",pec:"protocollo@pec.comune.floridia.sr.it",procura:PROCURE.siracusa},
+  "lentini":{email:"urp@comune.lentini.sr.it",pec:"protocollo@pec.comune.lentini.sr.it",procura:PROCURE.siracusa},
+  "carlentini":{email:"urp@comune.carlentini.sr.it",pec:"protocollo@pec.comune.carlentini.sr.it",procura:PROCURE.siracusa},
+  "ragusa":{email:"urp@comune.ragusa.it",pec:"protocollo@pec.comune.ragusa.it",procura:PROCURE.ragusa},
+  "modica":{email:"urp@comune.modica.rg.it",pec:"protocollo@pec.comune.modica.rg.it",procura:PROCURE.ragusa},
+  "vittoria":{email:"urp@comune.vittoria.rg.it",pec:"protocollo@pec.comune.vittoria.rg.it",procura:PROCURE.ragusa},
+  "comiso":{email:"urp@comune.comiso.rg.it",pec:"protocollo@pec.comune.comiso.rg.it",procura:PROCURE.ragusa},
+  "scicli":{email:"urp@comune.scicli.rg.it",pec:"protocollo@pec.comune.scicli.rg.it",procura:PROCURE.ragusa},
+  "ispica":{email:"urp@comune.ispica.rg.it",pec:"protocollo@pec.comune.ispica.rg.it",procura:PROCURE.ragusa},
+  "agrigento":{email:"urp@comune.agrigento.it",pec:"protocollo@pec.comune.agrigento.it",procura:PROCURE.agrigento},
+  "sciacca":{email:"urp@comune.sciacca.ag.it",pec:"protocollo@pec.comune.sciacca.ag.it",procura:PROCURE.agrigento},
+  "licata":{email:"urp@comune.licata.ag.it",pec:"protocollo@pec.comune.licata.ag.it",procura:PROCURE.agrigento},
+  "canicatti":{email:"urp@comune.canicatti.ag.it",pec:"protocollo@pec.comune.canicatti.ag.it",procura:PROCURE.agrigento},
+  "porto empedocle":{email:"urp@comune.portoempedocle.ag.it",pec:"protocollo@pec.comune.portoempedocle.ag.it",procura:PROCURE.agrigento},
+  "ribera":{email:"urp@comune.ribera.ag.it",pec:"protocollo@pec.comune.ribera.ag.it",procura:PROCURE.agrigento},
+  "favara":{email:"urp@comune.favara.ag.it",pec:"protocollo@pec.comune.favara.ag.it",procura:PROCURE.agrigento},
+  "caltanissetta":{email:"urp@comune.caltanissetta.it",pec:"comune.caltanissetta@pec.it",procura:PROCURE.caltanissetta},
+  "gela":{email:"urp@comune.gela.cl.it",pec:"protocollo@pec.comune.gela.cl.it",procura:PROCURE.caltanissetta},
+  "niscemi":{email:"urp@comune.niscemi.cl.it",pec:"protocollo@pec.comune.niscemi.cl.it",procura:PROCURE.caltanissetta},
+  "mussomeli":{email:"urp@comune.mussomeli.cl.it",pec:"protocollo@pec.comune.mussomeli.cl.it",procura:PROCURE.caltanissetta},
+  "enna":{email:"urp@comune.enna.it",pec:"protocollo@pec.comune.enna.it",procura:PROCURE.enna},
+  "piazza armerina":{email:"urp@comune.piazzaarmerina.en.it",pec:"protocollo@pec.comune.piazzaarmerina.en.it",procura:PROCURE.enna},
+  "nicosia":{email:"urp@comune.nicosia.en.it",pec:"protocollo@pec.comune.nicosia.en.it",procura:PROCURE.enna},
+  "leonforte":{email:"urp@comune.leonforte.en.it",pec:"protocollo@pec.comune.leonforte.en.it",procura:PROCURE.enna},
+  "trapani":{email:"urp@comune.trapani.it",pec:"protocollo@pec.comune.trapani.it",procura:PROCURE.trapani},
+  "marsala":{email:"urp@comune.marsala.tp.it",pec:"protocollo@pec.comune.marsala.tp.it",procura:PROCURE.trapani},
+  "mazara del vallo":{email:"urp@comune.mazaradelvallo.tp.it",pec:"protocollo@pec.comune.mazaradelvallo.tp.it",procura:PROCURE.trapani},
+  "alcamo":{email:"urp@comune.alcamo.tp.it",pec:"protocollo@pec.comune.alcamo.tp.it",procura:PROCURE.trapani},
+  "castelvetrano":{email:"urp@comune.castelvetrano.tp.it",pec:"protocollo@pec.comune.castelvetrano.tp.it",procura:PROCURE.trapani},
+  "erice":{email:"urp@comune.erice.tp.it",pec:"protocollo@pec.comune.erice.tp.it",procura:PROCURE.trapani},
+  "paceco":{email:"urp@comune.paceco.tp.it",pec:"protocollo@pec.comune.paceco.tp.it",procura:PROCURE.trapani},
+};
+const ENEL_PEC="illuminazionepubblica@pec.enel.it";
+
+// ═══ TABS ═══
+function setTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(name==='mappa')initMap();
+  if(name==='storico')renderStorico();
+  if(name==='impostazioni')loadSettings();
+  if(name==='segnala')checkDatiSegnalatore();
+}
+
+// ═══ FOTO ═══
+function handlePhoto(e){
+  const file=e.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    photoDataUrl=ev.target.result;
+    const area=document.getElementById('photoArea');
+    area.innerHTML=`<img src="${photoDataUrl}" style="width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;border-radius:inherit"><div class="photo-overlay">✓ Acquisita</div>`;
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+}
+
+// ═══ GPS ═══
+function getGPS(){
+  const btn=document.getElementById('gpsBtn');
+  const status=document.getElementById('gpsStatus');
+  const coords=document.getElementById('coordsDisplay');
+  const banner=document.getElementById('gpsPermBanner');
+  const signal=document.getElementById('gpsSignal');
+  if(!navigator.geolocation){
+    status.textContent='GPS non supportato dal browser.';
+    showToast('Usa Chrome su Android o Safari su iPhone',true);
+    return;
+  }
+  // NON usiamo navigator.permissions — Safari lo gestisce male e blocca prima di chiedere
+  banner.style.display='none';
+  btn.disabled=true; btn.innerHTML='⏳ GPS';
+  coords.textContent='Rilevamento...';
+  status.textContent='Acquisizione GPS in corso...';
+  navigator.geolocation.getCurrentPosition(
+    async pos=>{
+      currentLat=pos.coords.latitude.toFixed(6);
+      currentLng=pos.coords.longitude.toFixed(6);
+      const acc=Math.round(pos.coords.accuracy);
+      coords.textContent=`${currentLat}, ${currentLng}`;
+      status.textContent=`✅ Precisione: ±${acc}m — Identifico il comune...`;
+      btn.disabled=false; btn.innerHTML='✓ OK'; btn.classList.add('ok');
+      signal.classList.add('active'); signal.textContent='📡';
+      initMinimap();
+      await rilevaComuneGPS(currentLat,currentLng);
+    },
+    err=>{
+      btn.disabled=false; btn.innerHTML='📍 GPS'; btn.classList.remove('ok');
+      coords.textContent='Non rilevata';
+      if(err.code===1){
+        // PERMISSION_DENIED — ora mostriamo istruzioni specifiche per piattaforma
+        banner.style.display='block';
+        status.textContent='Permesso GPS negato — vedi istruzioni sopra';
+      } else if(err.code===2){
+        status.textContent='Segnale GPS assente. Vai all\'aperto e riprova.';
+        showToast('Vai all\'aperto e riprova',true);
+      } else if(err.code===3){
+        status.textContent='GPS lento. Riprova all\'aperto.';
+        showToast('GPS troppo lento. Riprova.',true);
+      } else {
+        status.textContent='Errore GPS: '+err.message;
+      }
+    },
+    {enableHighAccuracy:true, timeout:15000, maximumAge:0}
+  );
+}
+
+async function rilevaComuneGPS(lat,lng){
+  try{
+    const url=`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&accept-language=it`;
+    const r=await fetch(url,{headers:{'User-Agent':'CittaSicura/1.1'}});
+    const j=await r.json();
+    const a=j.address||{};
+    const nome=a.city||a.town||a.village||a.municipality||a.county||'';
+    currentComune=nome;
+    document.getElementById('gpsStatus').textContent=`✅ ${nome||'Comune non identificato'}`;
+    mostraEmailComune(nome);
+  }catch(e){currentComune='';mostraEmailComune('');}
+}
+
+// ═══ EMAIL COMUNE ═══
+function mostraEmailComune(nome){
+  const card=document.getElementById('comuneCard');
+  const elNome=document.getElementById('comuneRilevato');
+  const notice=document.getElementById('emailSalvataNotice');
+  card.style.display='block';
+  const key=nome.toLowerCase().trim();
+  const db=DB[key];
+  elNome.innerHTML=nome
+    ?`🏛 <strong>${nome}</strong> <span class="db-badge${db?'':' miss'}">${db?'✓ database':'inserisci manualmente'}</span>`
+    :`<span style="color:var(--muted)">Comune non identificato — inserisci le email manualmente</span>`;
+  // Email normale
+  const nl=document.getElementById('emailNormaleList'); nl.innerHTML='';
+  addDestRow(nl,'Ufficio Tecnico / Manutenzione Strade',db?.email||'','emailNormaleList');
+  // PEC
+  const pl=document.getElementById('emailPecList'); pl.innerHTML='';
+  addDestRow(pl,'PEC Comune (Protocollo Generale)',db?.pec||'','emailPecList');
+  if(selectedCategory==='Illuminazione guasta') addDestRow(pl,'ENEL – Illuminazione Pubblica (PEC)',ENEL_PEC,'emailPecList');
+  aggiornaNotificaProcura();
+  notice.style.display='none';
+}
+
+function addDestRow(container,label,value,listId){
+  const i=container.querySelectorAll('.email-dest-row').length;
+  const id=`dr-${listId}-${i}`;
+  const div=document.createElement('div');
+  div.className='email-dest-row'; div.id=id;
+  div.innerHTML=`<div class="email-dest-inner"><div class="email-dest-label">${label}</div><input type="email" value="${value}" placeholder="email@comune.it"></div><button class="remove-dest-btn" onclick="document.getElementById('${id}').remove()">✕</button>`;
+  container.appendChild(div);
+}
+
+function aggiungiEmailDest(){
+  const extra=document.getElementById('emailExtraList');
+  addDestRow(extra,'Altro destinatario','','emailExtraList');
+}
+
+function aggiornaNotificaProcura(){
+  document.getElementById('procuraNotice').style.display=selectedGravity==='Alta'?'block':'none';
+}
+
+function getAllEmails(){
+  const emails=[];
+  document.querySelectorAll('#emailNormaleList input[type="email"],#emailPecList input[type="email"],#emailExtraList input[type="email"]').forEach(inp=>{
+    const v=inp.value.trim(); if(v&&v.includes('@')&&!emails.includes(v))emails.push(v);
+  });
+  if(selectedGravity==='Alta'&&currentComune){
+    const proc=DB[currentComune.toLowerCase().trim()]?.procura;
+    if(proc&&!emails.includes(proc))emails.push(proc);
+  }
+  getSettings().emails.forEach(e=>{if(e&&e.includes('@')&&!emails.includes(e))emails.push(e);});
+  // Archivio fisso — riceve copia di tutte le segnalazioni
+  if(!emails.includes('cittasicura@yahoo.com'))emails.push('cittasicura@yahoo.com');
+  return emails;
+}
+
+function salvaEmailComune(){
+  if(!currentComune)return;
+  const key=currentComune.toLowerCase().trim();
+  const rows=[];
+  document.querySelectorAll('#emailNormaleList input[type="email"],#emailPecList input[type="email"]').forEach(inp=>{const v=inp.value.trim();if(v)rows.push(v);});
+  if(!rows.length)return;
+  const salvate=JSON.parse(localStorage.getItem('emailComuni')||'{}');
+  salvate[key]=rows; localStorage.setItem('emailComuni',JSON.stringify(salvate));
+}
+
+// ═══ CATEGORIA & GRAVITA ═══
+function selectCat(el,cat){
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected'); selectedCategory=cat;
+  if(currentComune)mostraEmailComune(currentComune);
+}
+function selectGrav(el,grav,cls){
+  document.querySelectorAll('.grav-btn').forEach(b=>b.className='grav-btn');
+  el.classList.add(cls); selectedGravity=grav;
+  aggiornaNotificaProcura();
+}
+
+// ═══ MINIMAP ═══
+function initMinimap(){
+  const el=document.getElementById('minimap'); el.style.display='block';
+  if(minimap){minimap.remove();minimap=null;}
+  minimap=L.map('minimap',{zoomControl:false,attributionControl:false}).setView([currentLat,currentLng],17);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(minimap);
+  L.circleMarker([currentLat,currentLng],{radius:10,color:'#3b82f6',fillColor:'#3b82f6',fillOpacity:.8}).addTo(minimap);
+}
+
+// ═══ INVIA EMAIL ═══
+function inviaEmail(){
+  if(!selectedCategory){showToast('Seleziona una categoria!',true);return;}
+  if(!currentLat){showToast('Rileva prima la posizione GPS!',true);return;}
+  autoSaveSettings();
+  const s=getSettings();
+  if(!s.nome||s.nome.length<3){showToast('⚙ Inserisci il tuo nome nelle Impostazioni!',true);setTimeout(()=>setTab('impostazioni'),1500);return;}
+  if(!s.emailMittente||!s.emailMittente.includes('@')){showToast('⚙ Inserisci la tua email nelle Impostazioni!',true);setTimeout(()=>setTab('impostazioni'),1500);return;}
+  if(!s.telefono||s.telefono.length<6){showToast('⚙ Inserisci il telefono nelle Impostazioni!',true);setTimeout(()=>setTab('impostazioni'),1500);return;}
+  const emails=getAllEmails();
+  if(!emails.length){showToast('Inserisci almeno un\'email destinatario!',true);return;}
+
+  const comune=currentComune||s.comune||'Comune';
+  const note=document.getElementById('note').value.trim();
+  const mapsLink=`https://www.google.com/maps?q=${currentLat},${currentLng}`;
+  const data=new Date().toLocaleString('it-IT');
+  const procuraInfo=selectedGravity==='Alta'&&DB[comune.toLowerCase()]?.procura
+    ?`\n⚖️  Procura: ${DB[comune.toLowerCase()].procura} (p.c.)`:'';
+
+  const oggetto=encodeURIComponent(`[CittàSicura] ${selectedCategory} – Gravità ${selectedGravity} – ${comune}`);
+  const corpo=`Gentile Ufficio del Comune di ${comune},
+
+La presente per segnalare un problema su suolo pubblico.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👤 DATI DEL SEGNALATORE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Nome e Cognome:  ${s.nome}
+Email:           ${s.emailMittente}
+Telefono:        ${s.telefono}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 DETTAGLI SEGNALAZIONE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏷  Categoria:    ${selectedCategory}
+⚠️  Gravità:      ${selectedGravity}${selectedGravity==='Alta'?' 🔴 (copia inviata alla Procura)':''}
+📅  Data/Ora:     ${data}
+🏛  Comune:       ${comune}${procuraInfo}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📸 FOTO DEL PROBLEMA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${photoDataUrl ? '📎 FOTO ALLEGATA — il segnalatore ha scattato una foto del problema.\n   Se non la vedi, chiedila in risposta a questa email.' : '❌ Nessuna foto scattata.'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📍 POSIZIONE GPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Latitudine:    ${currentLat}
+Longitudine:   ${currentLng}
+Google Maps:   ${mapsLink}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📝 NOTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${note||'Nessuna nota aggiuntiva.'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Inviata tramite CittàSicura v1.1
+© Massimo Filippello – tutti i diritti riservati
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Si prega di intervenire nel più breve tempo possibile.
+Distinti saluti,
+
+${s.nome}
+📧 ${s.emailMittente}
+📞 ${s.telefono}`;
+
+  salvaEmailComune();
+
+  // Salva il link mailto per dopo
+  _mailtoLink = `mailto:${emails.join(',')}?subject=${oggetto}&body=${encodeURIComponent(corpo)}`;
+
+  // Salva nello storico
+  const seg={id:Date.now(),category:selectedCategory,gravity:selectedGravity,comune,lat:currentLat,lng:currentLng,note,date:data,photo:photoDataUrl};
+  segnalazioni.unshift(seg);
+  localStorage.setItem('segnalazioni',JSON.stringify(segnalazioni));
+  updateBadge();
+
+  // Se c'è una foto, mostra il modale per salvarla prima
+  if (photoDataUrl) {
+    document.getElementById('fotoModalImg').src = photoDataUrl;
+    document.getElementById('fotoModal').classList.add('show');
+  } else {
+    proseguiInvio();
+  }
+}
+
+function salvaFotoDevice() {
+  // Crea un link di download temporaneo — su mobile permette di salvare in galleria
+  const a = document.createElement('a');
+  a.href = photoDataUrl;
+  a.download = `cittasicura_${Date.now()}.jpg`;
+  a.click();
+  showToast('📥 Foto pronta! Ora premi "Apri email e invia"');
+}
+
+function proseguiInvio() {
+  document.getElementById('fotoModal').classList.remove('show');
+  window.location.href = _mailtoLink;
+  setTimeout(resetForm, 800);
+}
+
+function resetForm(){
+  selectedCategory='';selectedGravity='';photoDataUrl=null;
+  currentLat=null;currentLng=null;currentComune='';
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('selected'));
+  document.querySelectorAll('.grav-btn').forEach(b=>b.className='grav-btn');
+  document.getElementById('note').value='';
+  document.getElementById('coordsDisplay').textContent='Non rilevata';
+  document.getElementById('gpsStatus').textContent='Tocca GPS per rilevare la posizione';
+  const btn=document.getElementById('gpsBtn');
+  btn.innerHTML='📍 GPS'; btn.classList.remove('ok'); btn.disabled=false; btn.style.background='';
+  document.getElementById('gpsSignal').classList.remove('active');
+  document.getElementById('gpsSignal').textContent='🛰';
+  document.getElementById('gpsPermBanner').style.display='none';
+  document.getElementById('comuneCard').style.display='none';
+  document.getElementById('emailNormaleList').innerHTML='';
+  document.getElementById('emailPecList').innerHTML='';
+  document.getElementById('emailExtraList').innerHTML='';
+  document.getElementById('procuraNotice').style.display='none';
+  document.getElementById('minimap').style.display='none';
+  const area=document.getElementById('photoArea');
+  if(area)area.innerHTML=`<div class="photo-placeholder"><span class="icon">📸</span><p>Usa i pulsanti qui sotto</p></div>`;
+}
+
+// ═══ MAPPA ═══
+function initMap(){
+  if(mapInitialized){renderMapMarkers();return;}
+  const center=segnalazioni.length?[segnalazioni[0].lat,segnalazioni[0].lng]:[37.5079,15.0830];
+  map=L.map('map').setView(center,13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
+  mapInitialized=true; renderMapMarkers();
+}
+function renderMapMarkers(){
+  if(!map)return;
+  map.eachLayer(l=>{if(l instanceof L.CircleMarker)map.removeLayer(l);});
+  const colors={'Alta':'#ef4444','Media':'#f59e0b','Bassa':'#22c55e'};
+  segnalazioni.forEach(s=>{
+    const c=colors[s.gravity]||'#6b7a99';
+    L.circleMarker([s.lat,s.lng],{radius:11,color:c,fillColor:c,fillOpacity:.8,weight:2})
+      .addTo(map).bindPopup(`<strong>${s.category}</strong><br>⚠️ ${s.gravity}<br>🏛 ${s.comune||''}<br>📅 ${s.date}${s.note?'<br>📝 '+s.note:''}`);
+  });
+}
+
+// ═══ STORICO ═══
+function renderStorico(){
+  const el=document.getElementById('storicoList');
+  const header=document.getElementById('storicoHeader');
+  const count=document.getElementById('storicoCount');
+  if(!segnalazioni.length){
+    header.style.display='none';
+    el.innerHTML=`<div class="empty-state"><div class="big">📋</div><p>Nessuna segnalazione.<br>Vai su Segnala per iniziare!</p></div>`;
+    return;
+  }
+  header.style.display='flex';
+  count.textContent=`${segnalazioni.length} segnalazion${segnalazioni.length===1?'e':'i'}`;
+  const gc={'Bassa':'bassa','Media':'media','Alta':'alta'};
+  el.innerHTML=segnalazioni.map(s=>`
+    <div class="storico-item" id="si-${s.id}">
+      <div class="storico-thumb">${s.photo?`<img src="${s.photo}">`:'📸'}</div>
+      <div class="storico-info">
+        <div class="storico-cat">${s.category}</div>
+        <div class="storico-meta">📅 ${s.date}</div>
+        <div class="storico-meta">📍 ${s.lat}, ${s.lng}</div>
+        ${s.comune?`<div class="storico-meta">🏛 ${s.comune}</div>`:''}
+        ${s.note?`<div class="storico-meta">📝 ${s.note}</div>`:''}
+        <span class="grav-pill ${gc[s.gravity]||''}">${s.gravity||'—'}</span>
+      </div>
+      <button class="del-item-btn" onclick="cancellaUna(${s.id})">🗑</button>
+    </div>`).join('');
+}
+function cancellaUna(id){
+  if(!confirm('Eliminare questa segnalazione?'))return;
+  segnalazioni=segnalazioni.filter(s=>s.id!==id);
+  localStorage.setItem('segnalazioni',JSON.stringify(segnalazioni));
+  updateBadge(); renderStorico(); if(mapInitialized)renderMapMarkers();
+  showToast('Segnalazione eliminata.');
+}
+function cancellatutte(){
+  if(!confirm(`Eliminare tutte le ${segnalazioni.length} segnalazioni?`))return;
+  segnalazioni=[]; localStorage.setItem('segnalazioni',JSON.stringify(segnalazioni));
+  updateBadge(); renderStorico(); if(mapInitialized)renderMapMarkers();
+  showToast('Storico cancellato.');
+}
+
+// ═══ IMPOSTAZIONI ═══
+function loadSettings(){
+  const s=getSettings();
+  document.getElementById('nomeMittente').value=s.nome||'';
+  document.getElementById('emailMittente').value=s.emailMittente||'';
+  document.getElementById('telefonoMittente').value=s.telefono||'';
+  document.getElementById('nomeComune').value=s.comune||'';
+  const el=document.getElementById('emailList'); el.innerHTML='';
+  (s.emails.length?s.emails:['']).forEach(email=>{
+    const row=document.createElement('div'); row.className='email-row';
+    row.innerHTML=`<input type="email" placeholder="email@ente.it" value="${email}"><button class="remove-btn" onclick="removeEmail(this)">✕</button>`;
+    el.appendChild(row);
+  });
+}
+function getSettings(){
+  const raw=localStorage.getItem('settings');
+  if(raw)return JSON.parse(raw);
+  return{nome:'',emailMittente:'',telefono:'',comune:'',emails:[]};
+}
+function autoSaveSettings(){
+  const nome=(document.getElementById('nomeMittente')?.value||'').trim();
+  const emailMittente=(document.getElementById('emailMittente')?.value||'').trim();
+  const telefono=(document.getElementById('telefonoMittente')?.value||'').trim();
+  const comune=(document.getElementById('nomeComune')?.value||'').trim();
+  if(nome||emailMittente||telefono){
+    const prev=getSettings();
+    const emails=[...document.querySelectorAll('#emailList input[type="email"]')].map(i=>i.value.trim()).filter(Boolean);
+    localStorage.setItem('settings',JSON.stringify({
+      nome:nome||prev.nome, emailMittente:emailMittente||prev.emailMittente,
+      telefono:telefono||prev.telefono, comune:comune||prev.comune,
+      emails:emails.length?emails:prev.emails
+    }));
+  }
+}
+function saveSettings(){
+  const nome=document.getElementById('nomeMittente').value.trim();
+  const emailMittente=document.getElementById('emailMittente').value.trim();
+  const telefono=document.getElementById('telefonoMittente').value.trim();
+  if(!nome||nome.length<3){showToast('Inserisci nome e cognome!',true);return;}
+  if(!emailMittente.includes('@')){showToast('Email non valida!',true);return;}
+  if(!telefono||telefono.length<6){showToast('Telefono non valido!',true);return;}
+  const comune=document.getElementById('nomeComune').value.trim();
+  const emails=[...document.querySelectorAll('#emailList input[type="email"]')].map(i=>i.value.trim()).filter(Boolean);
+  localStorage.setItem('settings',JSON.stringify({nome,emailMittente,telefono,comune,emails}));
+  showToast('✅ Impostazioni salvate!');
+  checkDatiSegnalatore();
+}
+function addEmailField(){
+  const row=document.createElement('div'); row.className='email-row';
+  row.innerHTML=`<input type="email" placeholder="email@ente.it"><button class="remove-btn" onclick="removeEmail(this)">✕</button>`;
+  document.getElementById('emailList').appendChild(row);
+}
+function removeEmail(btn){
+  if(document.querySelectorAll('#emailList .email-row').length<=1){showToast('Mantieni almeno un campo!',true);return;}
+  btn.parentElement.remove();
+}
+
+// ═══ UTILITY ═══
+function updateBadge(){document.getElementById('badgeCount').textContent=segnalazioni.length;}
+function checkDatiSegnalatore(){
+  autoSaveSettings();
+  const s=getSettings();
+  document.getElementById('warnDati').style.display=(!s.nome||!s.emailMittente||!s.telefono)?'block':'none';
+}
+let toastTimer;
+function showToast(msg,isErr=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast'+(isErr?' err':'');
+  clearTimeout(toastTimer);
+  requestAnimationFrame(()=>t.classList.add('show'));
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+}
+
+// ═══ INIT ═══
+updateBadge();
+checkDatiSegnalatore();
+</script>
+</body>
+</html>
