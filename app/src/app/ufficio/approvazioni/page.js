@@ -5,6 +5,7 @@ import { requireAdminPage } from '@/lib/admin';
 import { pecRecipientFor, reportsToReview } from '@/lib/approval';
 import { mediaUrl } from '@/lib/media';
 import { approvalRequired } from '@/lib/settings';
+import PhotoViewer from '@/components/office/PhotoViewer';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Da approvare – CivicAlerts' };
@@ -47,9 +48,7 @@ export default async function ApprovalsPage() {
                 <video src={media} controls playsInline style={{ width: '100%', borderRadius: 10, background: '#000' }} />
               )}
               {media && r.mediaType !== 'VIDEO' && (
-                <a href={media} target="_blank" rel="noreferrer">
-                  <img src={media} alt="Foto della segnalazione" style={{ width: '100%', borderRadius: 10, display: 'block', objectFit: 'cover', maxHeight: 260 }} />
-                </a>
+                <PhotoViewer src={media} style={{ width: '100%', borderRadius: 10, display: 'block', objectFit: 'cover', maxHeight: 260 }} />
               )}
             </div>
             <div style={{ flex: 1, minWidth: 260, display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -70,6 +69,7 @@ export default async function ApprovalsPage() {
                 <dt>Descrizione</dt><dd>{r.description || '—'}</dd>
                 <dt>Segnalante</dt>
                 <dd>
+                  {r.anonymous && <><span className="badge">Anonima: dati non inviati al Comune</span><br /></>}
                   {r.user ? <>{r.user.firstName} {r.user.lastName} · <a href={`mailto:${r.user.email}`}>{r.user.email}</a></> : 'utente rimosso'}
                 </dd>
                 {r.duplicateOf && (

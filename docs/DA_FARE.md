@@ -1,6 +1,6 @@
 # CivicAlerts – cose da fare
 
-Elenco delle attività decise: prima quelle ancora da fare, in fondo quelle già fatte. Aggiornato il 21/10/2026.
+Elenco delle attività decise: prima quelle ancora da fare, in fondo quelle già fatte. Aggiornato il 24/10/2026.
 
 ## Da fare sul server di casa
 
@@ -35,6 +35,8 @@ Elenco delle attività decise: prima quelle ancora da fare, in fondo quelle già
 - [ ] **Log tecnici al massimo 6 mesi** (promesso dall'informativa): oggi i registri dei contenitori ruotano per
       dimensione (5 file da 10 MB); aggiungere una pulizia periodica, ad es. `docker compose up -d --force-recreate`
       una volta al mese nell'attività pianificata.
+- [ ] **Informativa e segnalazioni anonime**: chiedere al legale se aggiungere che, con l'anonimato, nome, email e
+      telefono non vengono comunicati al Comune e le sue risposte sono inoltrate da CivicAlerts.
 - [ ] **Backup 30 giorni**: l'informativa definitiva non lo cita; chiedere al legale se aggiungerlo.
 - [ ] **Avvio reale (19/10/2026)**: ultima prova completa con `PEC_OVERRIDE_TO` ancora attivo, poi cancellare
       utenti e segnalazioni di prova, togliere `PEC_OVERRIDE_TO` dal `.env` e `docker compose up -d`.
@@ -73,6 +75,8 @@ Elenco delle attività decise: prima quelle ancora da fare, in fondo quelle già
 
 | Data | Cosa |
 |---|---|
+| 24/10/2026 | **Segnalazione anonima**: scelta predefinita in registrazione e nel profilo, modificabile in ogni segnalazione; il Comune non riceve i dati del cittadino, gli operatori non li vedono, le risposte del Comune vengono inoltrate al cittadino via email |
+| 24/10/2026 | Pagina **Chi siamo** (clic sul nome CivicAlerts) con i progettisti; foto ingrandita in dashboard con pulsante **Chiudi** (prima nell'app installata non si tornava indietro) |
 | 21/10/2026 | **Lettura automatica della casella PEC**: ricevute di consegna, risposte dei Comuni collegate alla segnalazione e numero di protocollo inserito da solo (o a mano con "Protocollo del Comune"); `civicalerts@pec.it` in copia nelle risposte |
 | 21/10/2026 | Anteprima e modifica della PEC prima dell'approvazione; scelta fra posizione della foto e posizione attuale |
 | 13/10/2026 | **Nota nella PEC al Comune** "Perché ricevete questa PEC": richiesta di indirizzi, WhatsApp o gestori specifici da comunicare a `civicalerts@pec.it` |

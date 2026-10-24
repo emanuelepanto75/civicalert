@@ -8,7 +8,7 @@ export default async function CitizenLayout({ children }) {
   return (
     <div className="shell">
       <header className="topbar">
-        <Link href="/" className="logo">
+        <Link href="/chi-siamo" className="logo" title="Chi siamo">
           <span className="logo-icon">🛡</span>
           <span>
             Civic<span>Alerts</span>

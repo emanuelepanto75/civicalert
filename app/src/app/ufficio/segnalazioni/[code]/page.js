@@ -10,6 +10,7 @@ import ProtocolEdit from '@/components/office/ProtocolEdit';
 import { pecRecipientFor } from '@/lib/approval';
 import StatusPanel from './StatusPanel';
 import NoteForm from './NoteForm';
+import PhotoViewer from '@/components/office/PhotoViewer';
 
 export const dynamic = 'force-dynamic';
 
@@ -62,9 +63,7 @@ export default async function OfficeReportPage({ params }) {
               {report.mediaType === 'VIDEO' ? (
                 <video src={media} controls playsInline style={{ width: '100%', display: 'block', maxHeight: 460, background: '#000' }} />
               ) : (
-                <a href={media} target="_blank" rel="noreferrer">
-                  <img src={media} alt="Foto della segnalazione" style={{ width: '100%', display: 'block', maxHeight: 460, objectFit: 'contain', background: '#000' }} />
-                </a>
+                <PhotoViewer src={media} style={{ width: '100%', display: 'block', maxHeight: 460, objectFit: 'contain', background: '#000' }} />
               )}
             </div>
           )}
@@ -110,8 +109,11 @@ export default async function OfficeReportPage({ params }) {
               )}
               <dt>Segnalante</dt>
               <dd>
-                {report.user ? (
+                {report.anonymous && user.role !== 'ADMIN' ? (
+                  'Anonimo, su richiesta del cittadino'
+                ) : report.user ? (
                   <>
+                    {report.anonymous && <><span className="badge">Anonima: dati non inviati al Comune</span><br /></>}
                     {report.user.firstName} {report.user.lastName}<br />
                     <a href={`mailto:${report.user.email}`}>{report.user.email}</a>
                     {report.user.phone && <> · <a href={`tel:${report.user.phone}`}>{report.user.phone}</a></>}

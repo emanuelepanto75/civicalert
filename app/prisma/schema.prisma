@@ -30,6 +30,7 @@ model User {
   failedLogins      Int       @default(0) @map("failed_logins")
   lockedUntil       DateTime? @map("locked_until")
   isBanned          Boolean   @default(false) @map("is_banned")
+  anonymousDefault  Boolean   @default(false) @map("anonymous_default") // scelta predefinita per le nuove segnalazioni
   createdAt         DateTime  @default(now()) @map("created_at")
   lastLoginAt       DateTime? @map("last_login_at")
 
@@ -122,6 +123,7 @@ model Report {
   pecNote         String?       @map("pec_note")
   // Da dove viene la posizione: PHOTO = GPS della foto (luogo dello scatto), DEVICE = telefono all'invio
   locationSource  String        @default("DEVICE") @map("location_source")
+  anonymous       Boolean       @default(false) // i dati del segnalante non vanno al Comune
   // Numero di protocollo assegnato dal Comune (letto dalle PEC di risposta o inserito a mano)
   protocolNumber  String?       @map("protocol_number")
   protocolDate    String?       @map("protocol_date")

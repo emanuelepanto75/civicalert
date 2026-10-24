@@ -9,7 +9,7 @@ function platformAddress() {
 
 // Nota in fondo a ogni PEC: perché il Comune la riceve e come indicarci canali più adatti.
 // "Rispondi" va al cittadino e a CivicAlerts; per i recapiti si scrive alla casella della piattaforma.
-function channelsNote() {
+function channelsNote(anonymous = false) {
   const to = platformAddress();
   return {
     title: 'Perché ricevete questa PEC',
@@ -17,7 +17,9 @@ function channelsNote() {
       'CivicAlerts è un servizio gratuito con cui i cittadini segnalano problemi del territorio (buche, illuminazione, rifiuti, segnaletica…) con foto e posizione GPS. Ogni segnalazione viene inviata via PEC al Comune competente per la zona, a questo indirizzo.',
       'Se preferite ricevere le segnalazioni su un indirizzo diverso (per esempio l’ufficio tecnico o la polizia municipale), se avete un numero WhatsApp o un altro canale dedicato, oppure se per alcuni tipi di problema esiste un gestore specifico (per esempio la ditta che cura l’illuminazione pubblica o la raccolta dei rifiuti), vi chiediamo di comunicarcelo:',
       `scrivete a ${to} indicando il Comune, il tipo di problema e il recapito. Aggiorneremo i nostri dati e le prossime segnalazioni arriveranno direttamente al destinatario giusto.`,
-      'Con “Rispondi” la risposta arriva sia al cittadino che ha fatto la segnalazione sia a CivicAlerts.',
+      anonymous
+        ? 'Il cittadino ha chiesto di restare anonimo: con “Rispondi” la risposta arriva a CivicAlerts, che la inoltra al segnalante.'
+        : 'Con “Rispondi” la risposta arriva sia al cittadino che ha fatto la segnalazione sia a CivicAlerts.',
     ],
   };
 }
@@ -43,6 +45,8 @@ function formatDate(date) {
  */
 export function buildReportPec({ report, siteUrl, repeat = null }) {
   const { user, category, municipality } = report;
+  // Anonima: al Comune non vanno nome, email e telefono (né come "Rispondi a")
+  const anonymous = Boolean(report.anonymous);
   const mapsUrl = `https://www.openstreetmap.org/?mlat=${report.latitude}&mlon=${report.longitude}#map=19/${report.latitude}/${report.longitude}`;
   const detailUrl = `${siteUrl}/segnalazioni/${report.code}`;
   const subject =
@@ -63,12 +67,16 @@ export function buildReportPec({ report, siteUrl, repeat = null }) {
     ...(report.photoTakenAt ? [['Foto scattata il', formatShot(report.photoTakenAt)]] : []),
     ['Descrizione', report.description || '—'],
     ...(repeat ? [['Segnalazioni dello stesso problema', `${repeat.number} (prima: ${repeat.firstCode}, ${formatDate(repeat.firstDate)})`]] : []),
-    ['Segnalante', user ? `${user.firstName} ${user.lastName}` : 'utente rimosso'],
-    ['Email segnalante', user?.email || '—'],
-    ['Telefono segnalante', user?.phone || '—'],
+    ...(anonymous
+      ? [['Segnalante', 'Anonimo, su richiesta del cittadino']]
+      : [
+          ['Segnalante', user ? `${user.firstName} ${user.lastName}` : 'utente rimosso'],
+          ['Email segnalante', user?.email || '—'],
+          ['Telefono segnalante', user?.phone || '—'],
+        ]),
   ];
 
-  const note = channelsNote();
+  const note = channelsNote(anonymous);
   const html = `<!doctype html><html lang="it"><body style="font-family:Arial,sans-serif;color:#111827">
 <div style="background:#1A3A6B;color:#fff;padding:20px 24px">
   <h2 style="margin:0">Segnalazione ${escapeHtml(report.code)}</h2>
@@ -88,7 +96,7 @@ export function buildReportPec({ report, siteUrl, repeat = null }) {
   </table>
   <p><a href="${mapsUrl}">Apri la posizione sulla mappa</a> · <a href="${detailUrl}">Dettaglio segnalazione</a></p>
   <p style="font-size:12px;color:#6b7280">La foto/video è allegata a questo messaggio.
-  Per comunicare il numero di protocollo, la presa in carico o la risoluzione è sufficiente rispondere a questa PEC: la risposta arriva al cittadino e a CivicAlerts.</p>
+  Per comunicare il numero di protocollo, la presa in carico o la risoluzione è sufficiente rispondere a questa PEC: ${anonymous ? 'la risposta arriva a CivicAlerts, che la inoltra al cittadino' : 'la risposta arriva al cittadino e a CivicAlerts'}.</p>
   <div style="margin-top:20px;background:#f8f9fb;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px;font-size:13px;color:#374151">
     <p style="margin:0 0 8px;font-weight:bold;color:#1A3A6B">${escapeHtml(note.title)}</p>
     ${note.paragraphs.map((p) => `<p style="margin:0 0 8px">${escapeHtml(p)}</p>`).join('')}
@@ -106,7 +114,7 @@ export function buildReportPec({ report, siteUrl, repeat = null }) {
     ? [{ filename: `${report.code}${path.extname(report.mediaPath)}`, path: path.join(config.uploadDir, report.mediaPath) }]
     : [];
   // "Rispondi" del Comune: al cittadino e alla casella PEC della piattaforma (che legge il protocollo)
-  return { subject, html, text, attachments, replyTo: [user?.email, platformAddress()].filter(Boolean) };
+  return { subject, html, text, attachments, replyTo: [anonymous ? null : user?.email, platformAddress()].filter(Boolean) };
 }
 
 /**

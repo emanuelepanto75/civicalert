@@ -63,6 +63,9 @@ export default async function ReportDetailPage({ params }) {
             </div>
           )}
           {r.description && <div className="kv"><span className="k">Descrizione</span><span className="v">{r.description}</span></div>}
+          {isOwner && raw.anonymous && (
+            <div className="kv"><span className="k">Anonima</span><span className="v">I tuoi dati non sono stati inviati al Comune</span></div>
+          )}
           {isOwner && raw.protocolNumber && (
             <div className="kv">
               <span className="k">Protocollo del Comune</span>

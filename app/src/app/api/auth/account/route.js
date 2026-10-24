@@ -5,6 +5,16 @@ import { prisma } from '@/lib/db';
 import { jsonError } from '@/lib/http';
 import { destroySession } from '@/lib/session';
 
+// Preferenze del cittadino: anonimato predefinito per le nuove segnalazioni.
+export async function PATCH(request) {
+  const user = await getCurrentUser();
+  if (!user) return jsonError('Accedi per continuare', 401);
+  const { anonymousDefault } = await request.json().catch(() => ({}));
+  if (typeof anonymousDefault !== 'boolean') return jsonError('Valore non valido');
+  await prisma.user.update({ where: { id: user.id }, data: { anonymousDefault } });
+  return NextResponse.json({ ok: true, anonymousDefault });
+}
+
 // Il cittadino cancella il proprio account (conferma con la password).
 // Le sue segnalazioni restano, senza dati che lo identificano, fino alla scadenza.
 export async function DELETE(request) {

@@ -7,7 +7,7 @@ import { useGeolocation } from './useGeolocation';
 
 const STEP_LABELS = ['Foto', 'Categoria', 'Invio'];
 
-export default function ReportWizard({ categories, review }) {
+export default function ReportWizard({ categories, review, anonymousDefault = false }) {
   const [step, setStep] = useState(0);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -77,6 +77,7 @@ export default function ReportWizard({ categories, review }) {
             geo={geo}
             photoInfo={photoInfo}
             review={review}
+            anonymousDefault={anonymousDefault}
             onBack={() => setStep(1)}
             onDone={setResult}
           />
@@ -170,12 +171,13 @@ function CategoryStep({ categories, categoryId, setCategoryId, description, setD
   );
 }
 
-function ReviewStep({ file, preview, category, description, geo, photoInfo, review, onBack, onDone }) {
+function ReviewStep({ file, preview, category, description, geo, photoInfo, review, anonymousDefault, onBack, onDone }) {
   const [check, setCheck] = useState(null);
   const [checking, setChecking] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState(null);
   const [source, setSource] = useState(null); // 'photo' | 'device', scelto dal cittadino
+  const [anonymous, setAnonymous] = useState(anonymousDefault);
 
   // Due posizioni possibili: dove è stata scattata la foto e dove si trova ora il telefono.
   // Se sono lontane (o il GPS del telefono non c'è) il cittadino sceglie quale usare.
@@ -216,6 +218,7 @@ function ReviewStep({ file, preview, category, description, geo, photoInfo, revi
     form.append('longitude', position.longitude);
     if (position.accuracy != null) form.append('accuracy', position.accuracy);
     form.append('locationSource', useSource);
+    form.append('anonymous', anonymous ? '1' : '0');
     try {
       onDone(await api('/api/reports', { body: form }));
     } catch (err) {
@@ -313,9 +316,21 @@ function ReviewStep({ file, preview, category, description, geo, photoInfo, revi
       {error && <div className="alert error">{error}</div>}
 
       {review && <ReviewNotice />}
+      <label className="check card" style={{ padding: 14 }}>
+        <input type="checkbox" checked={anonymous} onChange={(e) => setAnonymous(e.target.checked)} />
+        <span>
+          <b>Segnalazione anonima</b>
+          <br />
+          <span className="muted small">
+            Il Comune non riceve i tuoi dati; le sue risposte arrivano a CivicAlerts, che te le inoltra via email.
+          </span>
+        </span>
+      </label>
       <div className="alert info small">
         🛡️ La segnalazione sarà inviata al Comune tramite <strong>PEC</strong>, con ricevuta di consegna legalmente valida.
-        Al Comune verranno comunicati nome, cognome, email e telefono; sulla mappa pubblica no.
+        {anonymous
+          ? ' Al Comune non verranno comunicati nome, email e telefono.'
+          : ' Al Comune verranno comunicati nome, cognome, email e telefono; sulla mappa pubblica no.'}
       </div>
 
       <div className="row">

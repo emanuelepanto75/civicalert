@@ -22,7 +22,8 @@ export async function GET(request) {
   });
 
   const header = ['Codice', 'Data', 'Categoria', 'Stato', 'Indirizzo', 'Comune', 'Latitudine', 'Longitudine', 'Descrizione', 'Segnalante', 'Email', 'Telefono', 'Chiusa il'];
-  const rows = reports.map((r) => [
+  // Segnalazioni anonime: i dati del cittadino li vede solo l'amministratore
+  const rows = reports.map((r) => [r, r.anonymous && user.role !== 'ADMIN']).map(([r, hide]) => [
     r.code,
     fmt(r.createdAt),
     r.category.name,
@@ -32,9 +33,9 @@ export async function GET(request) {
     r.latitude.toFixed(6).replace('.', ','),
     r.longitude.toFixed(6).replace('.', ','),
     r.description,
-    r.user ? `${r.user.firstName} ${r.user.lastName}` : 'utente rimosso',
-    r.user?.email,
-    r.user?.phone,
+    hide ? 'anonimo' : r.user ? `${r.user.firstName} ${r.user.lastName}` : 'utente rimosso',
+    hide ? '' : r.user?.email,
+    hide ? '' : r.user?.phone,
     fmt(r.resolvedAt),
   ]);
   const csv = '﻿' + [header, ...rows].map((row) => row.map(csvCell).join(';')).join('\r\n');

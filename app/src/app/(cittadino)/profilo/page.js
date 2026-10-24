@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth';
 import Link from 'next/link';
+import AnonymousDefault from './AnonymousDefault';
 import DeleteAccount from './DeleteAccount';
 import LogoutButton from './LogoutButton';
 
@@ -20,10 +21,11 @@ export default async function ProfilePage() {
           )}
         </div>
       </div>
+      {user.role === 'CITIZEN' && <AnonymousDefault initial={user.anonymousDefault} />}
       <LogoutButton />
       {user.role === 'CITIZEN' && <DeleteAccount />}
       <p className="muted small center">
-        <Link href="/privacy">Privacy e cookie</Link>
+        <Link href="/chi-siamo">Chi siamo</Link> · <Link href="/privacy">Privacy e cookie</Link>
       </p>
     </div>
   );

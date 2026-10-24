@@ -112,6 +112,7 @@ export async function POST(request) {
         authenticity: flags,
         duplicateOfId: sameProblem?.first?.id ?? null,
         locationSource: fromPhoto ? 'PHOTO' : 'DEVICE',
+        anonymous: form.get('anonymous') === '1',
         ...(review && { status: 'REVIEW' }),
         deliveries: pecTo ? { create: { channel: 'PEC', recipient: pecTo } } : undefined,
       },

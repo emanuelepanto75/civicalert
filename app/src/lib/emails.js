@@ -161,3 +161,24 @@ export function sendReviewEmail({ report, approved, pec, note, siteUrl }) {
     text: `La tua segnalazione ${report.code} ${what}.${note ? `\n\nMotivo: ${note}` : ''}\n\n${link}`,
   });
 }
+
+/** Risposta del Comune a una segnalazione anonima: arriva solo a CivicAlerts, che la inoltra al cittadino. */
+export function sendComuneReplyEmail({ report, from, subject, text, protocol, siteUrl }) {
+  const link = `${siteUrl}/segnalazioni/${report.code}`;
+  const protoLine = protocol ? `Numero di protocollo: ${protocol.number}${protocol.date ? ` del ${protocol.date}` : ''}` : '';
+  const body = text.slice(0, 4000);
+  return sendMail({
+    to: report.user.email,
+    subject: `CivicAlerts – il Comune ha risposto alla segnalazione ${report.code}`,
+    html: layout(
+      `Risposta del Comune · ${report.code}`,
+      `Ciao ${escapeHtml(report.user.firstName)}, il Comune ha risposto alla tua segnalazione anonima “${escapeHtml(report.category.name)}”.` +
+        (protoLine ? `<p><b>${escapeHtml(protoLine)}</b></p>` : '') +
+        `<p style="font-size:13px;color:#6b7280">Da: ${escapeHtml(from || '—')}<br>Oggetto: ${escapeHtml(subject || '—')}</p>` +
+        `<div style="background:#f8f9fb;border-left:3px solid #1A3A6B;padding:10px 14px;white-space:pre-wrap">${escapeHtml(body)}</div>`,
+      link,
+      'Vedi la segnalazione',
+    ),
+    text: `Il Comune ha risposto alla tua segnalazione anonima ${report.code}.\n${protoLine ? `${protoLine}\n` : ''}\nDa: ${from || '—'}\nOggetto: ${subject || '—'}\n\n${body}\n\n${link}`,
+  });
+}

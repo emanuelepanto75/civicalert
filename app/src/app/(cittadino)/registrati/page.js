@@ -15,7 +15,7 @@ const FIELDS = [
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', password: '', privacy: false });
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', password: '', privacy: false, anonymousDefault: false });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -55,8 +55,17 @@ export default function RegisterPage() {
           Dichiaro di avere almeno 18 anni e di aver letto l’<Link href="/privacy" target="_blank">informativa privacy</Link>.
         </span>
       </label>
+      <label className="check">
+        <input type="checkbox" checked={form.anonymousDefault}
+          onChange={(e) => setForm({ ...form, anonymousDefault: e.target.checked })} />
+        <span>
+          <b>Segnala in forma anonima</b>: il Comune non riceve nome, email e telefono. Puoi cambiare idea in ogni
+          segnalazione e dal profilo.
+        </span>
+      </label>
       <p className="muted small" style={{ marginTop: -6 }}>
-        Nome, cognome, email e telefono vengono inviati solo al Comune che riceve le tue segnalazioni. Sulla mappa pubblica non compaiono mai.
+        Nome, cognome, email e telefono vengono inviati solo al Comune che riceve le tue segnalazioni (mai se scegli
+        l’anonimato). Sulla mappa pubblica non compaiono mai.
       </p>
 
       <button className="btn" disabled={loading}>

@@ -2,6 +2,7 @@ import { ImapFlow } from 'imapflow';
 import { simpleParser } from 'mailparser';
 import { notifyAdmin } from './adminNotify';
 import { config } from './config';
+import { sendComuneReplyEmail } from './emails';
 import { prisma } from './db';
 
 // Lettura della casella PEC della piattaforma (civicalerts@pec.it): ricevute di
@@ -80,12 +81,12 @@ function kindOf(subject = '') {
 async function findReport({ subject, text, inReplyTo, references }) {
   const code = (subject || '').match(CODE_RE)?.[0] || (text || '').match(CODE_RE)?.[0];
   if (code) {
-    const r = await prisma.report.findUnique({ where: { code }, include: { deliveries: true } });
+    const r = await prisma.report.findUnique({ where: { code }, include: { deliveries: true, user: true, category: true } });
     if (r) return r;
   }
   const ids = [inReplyTo, ...(Array.isArray(references) ? references : [references])].filter(Boolean);
   if (ids.length) {
-    const d = await prisma.delivery.findFirst({ where: { messageId: { in: ids } }, include: { report: { include: { deliveries: true } } } });
+    const d = await prisma.delivery.findFirst({ where: { messageId: { in: ids } }, include: { report: { include: { deliveries: true, user: true, category: true } } } });
     if (d) return d.report;
   }
   return null;
@@ -156,6 +157,12 @@ export async function handlePecMessage(source, innerSource = null) {
         note: `PEC ricevuta da ${from || 'mittente sconosciuto'}: ${msg.subject || ''}${protocol ? ` — protocollo n. ${protocol.number}${protocol.date ? ` del ${protocol.date}` : ''}` : ''}`,
       },
     });
+  }
+  // Segnalazione anonima: il Comune non conosce il cittadino, la risposta gliela inoltriamo noi
+  if (report?.anonymous && report.user?.email && config.publicUrl) {
+    await sendComuneReplyEmail({ report, from, subject: msg.subject, text, protocol, siteUrl: config.publicUrl }).catch((err) =>
+      console.error('[pec in arrivo] inoltro al cittadino non riuscito:', err.message),
+    );
   }
   await notifyAdmin(
     report

@@ -15,5 +15,5 @@ export default async function NewReportPage() {
     orderBy: { sortOrder: 'asc' },
     select: { id: true, name: true, icon: true },
   });
-  return <ReportWizard categories={categories} review={await approvalRequired()} />;
+  return <ReportWizard categories={categories} review={await approvalRequired()} anonymousDefault={user.anonymousDefault} />;
 }
